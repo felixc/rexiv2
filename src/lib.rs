@@ -322,7 +322,7 @@ impl Metadata {
             let mut vals = vec![];
             let c_vals = gexiv2::gexiv2_metadata_get_tag_multiple(self.raw, c_str_tag);
             let mut cur_offset = 0;
-            while !(*c_vals.offset(cur_offset) as u8 == 0) {
+            while !(*c_vals.offset(cur_offset) as i8 == 0) {
                 let value = str::from_utf8(
                     ffi::CStr::from_ptr((*c_vals.offset(cur_offset))).to_bytes());
                 match value {
@@ -337,9 +337,15 @@ impl Metadata {
 
     /// Store the given strings as the values of a tag.
     #[allow(unused)]
-    pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) {
-        // TODO: Find out how to pass an array of strings through the FFI.
-        panic!("Not implemented");
+    pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) -> bool {
+        unsafe {
+            let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+            let c_strs: Result<Vec<_>, _> = values.iter().map(|&s| ffi::CString::new(s)).collect();
+            let c_strs = c_strs.unwrap();
+            let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
+            ptrs.push(0 as *const i8);
+            gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag, ptrs.as_ptr())
+        }
     }
 
     /// Get the value of a tag as a long.
