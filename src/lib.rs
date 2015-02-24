@@ -201,7 +201,7 @@ impl Metadata {
             let mut tags = vec![];
             let c_tags = gexiv2::gexiv2_metadata_get_exif_tags(self.raw);
             let mut cur_offset = 0;
-            while !(*c_tags.offset(cur_offset) as u8 == 0) {
+            while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = str::from_utf8(
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
