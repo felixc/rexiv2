@@ -18,9 +18,9 @@ Documentation
 
 API documentation is [available online][rexiv2-doc].
 
-Exiv2's homepage has documentation on available [namespaces and tags][tags-doc].
+Exiv2’s homepage has documentation on available [namespaces and tags][tags-doc].
 
-[gexiv2's APIs][gexiv2-api] may also be a useful reference, along with [Exiv2's
+[gexiv2’s APIs][gexiv2-api] may also be a useful reference, along with [Exiv2’s
 API docs][exiv2-api].
 
 During development and testing, the [Exiv2 command-line utility][exiv2-cli] may
@@ -43,11 +43,8 @@ code. You can download these dependencies from their download pages:
 
 On a Linux system, you can typically install these dependencies through your
 package manager. Mac OS X users may also have this option through unofficial
-package management systems.
-
-Be aware that the Debian libgexiv2 package will only create a `libgexiv2.so.2`
-file, which you will have to manually symlink to be available as `libgexiv2.so`
-(note the lack of trailing “.2”).
+package management systems. Note that to build rexiv2 from source you may need
+not just the library packages, but the “dev” versions of them as well.
 
 [exiv2-dl]:  http://www.exiv2.org/download.html
 [gexiv2-dl]: https://wiki.gnome.org/Projects/gexiv2/BuildingAndInstalling
@@ -62,7 +59,7 @@ Version numbers follow the principles of [Semantic Versioning][semver]. In
 particular, this means that once development reaches the 1.0.0 version, the
 API will be considered stable, and any changes will be made gradually and
 gracefully across multiple versions, with reasonable deprecation timelines.
-But, until then, don't rely on the API working the same way from minor version
+But, until then, don’t rely on the API working the same way from minor version
 to minor version.
 
 See the [`CHANGELOG`](CHANGELOG) file for a history of released versions.
