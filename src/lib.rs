@@ -95,7 +95,7 @@ impl Metadata {
     }
 
     /// Save metadata to the file found at the given path, which must already exist.
-    pub fn save_to_file(&self, path: &str) -> Result<Metadata, String> {
+    pub fn save_to_file(&self, path: &str) -> Result<(), String> {
         unsafe {
             let mut err: *mut gexiv2::GError = ptr::null_mut();
             let c_str_path = ffi::CString::new(path).unwrap().as_ptr();
@@ -108,7 +108,7 @@ impl Metadata {
                     Err(_) => { return Err(String::from_str("Unknown error")); }
                 }
             }
-            Ok(Metadata { raw: self.raw })
+            Ok(())
         }
     }
 
