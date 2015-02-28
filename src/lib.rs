@@ -42,7 +42,6 @@
 #![feature(core)]         // TODO: Remove once stabilized.
 #![feature(libc)]         // TODO: Remove once stabilized.
 #![feature(std_misc)]     // TODO: Remove once stabilized.
-#![feature(collections)]  // TODO: Remove once stabilized.
 
 mod gexiv2;
 
@@ -86,8 +85,8 @@ impl Metadata {
             if !ok {
                 let err_msg = str::from_utf8(ffi::CStr::from_ptr((*err).message).to_bytes());
                 match err_msg {
-                    Ok(v) => { return Err(String::from_str(v)); }
-                    Err(_) => { return Err(String::from_str("Unknown error")); }
+                    Ok(v) => { return Err(v.to_string()); }
+                    Err(_) => { return Err("Unknown error".to_string()); }
                 }
             }
             Ok(Metadata { raw: metadata })
@@ -104,8 +103,8 @@ impl Metadata {
             if !ok {
                 let err_msg = str::from_utf8(ffi::CStr::from_ptr((*err).message).to_bytes());
                 match err_msg {
-                    Ok(v) => { return Err(String::from_str(v)); }
-                    Err(_) => { return Err(String::from_str("Unknown error")); }
+                    Ok(v) => { return Err(v.to_string()); }
+                    Err(_) => { return Err("Unknown error".to_string()); }
                 }
             }
             Ok(())
@@ -135,13 +134,12 @@ impl Metadata {
     /// Return the MIME type of the loaded file.
     pub fn get_mime_type(&self) -> Result<String, str::Utf8Error> {
         // TODO: Return an enum?
-        // TODO: Handle decoding errors properly (return something smarter)
         // TODO: Rename? Media Type?
         unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
             let mime = str::from_utf8(ffi::CStr::from_ptr(c_str_mime).to_bytes());
             match mime {
-                Ok(v) => { return Ok(String::from_str(v)); }
+                Ok(v) => { return Ok(v.to_string()); }
                 Err(e) => { return Err(e); }
             }
         }
@@ -205,7 +203,7 @@ impl Metadata {
                 let tag = str::from_utf8(
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
-                    Ok(v) => { tags.push(String::from_str(v)); }
+                    Ok(v) => { tags.push(v.to_string()); }
                     Err(e) => { return Err(e); }
                 }
                 cur_offset += 1;
@@ -234,7 +232,7 @@ impl Metadata {
                 let tag = str::from_utf8(
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
-                    Ok(v) => { tags.push(String::from_str(v)); }
+                    Ok(v) => { tags.push(v.to_string()); }
                     Err(e) => { return Err(e); }
                 }
                 cur_offset += 1;
@@ -263,7 +261,7 @@ impl Metadata {
                 let tag = str::from_utf8(
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
-                    Ok(v) => { tags.push(String::from_str(v)); }
+                    Ok(v) => { tags.push(v.to_string()); }
                     Err(e) => { return Err(e); }
                 }
                 cur_offset += 1;
@@ -281,7 +279,7 @@ impl Metadata {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag);
             let value = str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes());
             match value {
-                Ok(v) => { return Ok(String::from_str(v)); }
+                Ok(v) => { return Ok(v.to_string()); }
                 Err(e) => { return Err(e); }
             }
         }
@@ -307,7 +305,7 @@ impl Metadata {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag);
             let value = str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes());
             match value {
-                Ok(v) => { return Ok(String::from_str(v)); }
+                Ok(v) => { return Ok(v.to_string()); }
                 Err(e) => { return Err(e); }
             }
         }
@@ -326,7 +324,7 @@ impl Metadata {
                 let value = str::from_utf8(
                     ffi::CStr::from_ptr((*c_vals.offset(cur_offset))).to_bytes());
                 match value {
-                    Ok(v) => { vals.push(String::from_str(v)); }
+                    Ok(v) => { vals.push(v.to_string()); }
                     Err(e) => { return Err(e); }
                 }
                 cur_offset += 1;
@@ -412,7 +410,6 @@ impl Metadata {
 
     /// Returns the camera exposure time of the photograph.
     pub fn get_exposure_time(&self) -> Option<Rational> {
-        // TODO: Handle missing data better.
         unsafe {
             let num: *mut i32 = ptr::null_mut();
             let den: *mut i32 = ptr::null_mut();
@@ -525,7 +522,7 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok(String::from_str("Subject")));
+/// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_string()));
 /// ```
 pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
     unsafe {
@@ -533,7 +530,7 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag);
         let label = str::from_utf8(ffi::CStr::from_ptr(c_str_label).to_bytes());
         match label {
-            Ok(v) => { return Ok(String::from_str(v)); }
+            Ok(v) => { return Ok(v.to_string()); }
             Err(e) => { return Err(e) }
         }
     }
@@ -543,8 +540,8 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::get_tag_description("Iptc.Application2.Subject"), Ok(String::from_str(
-///     "The Subject Reference is a structured definition of the subject matter.")))
+/// assert_eq!(rexiv2::get_tag_description("Iptc.Application2.Subject"),
+///     Ok("The Subject Reference is a structured definition of the subject matter.".to_string()))
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
     unsafe {
@@ -552,7 +549,7 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag);
         let desc = str::from_utf8(ffi::CStr::from_ptr(c_str_desc).to_bytes());
         match desc {
-            Ok(v) => { return Ok(String::from_str(v)); }
+            Ok(v) => { return Ok(v.to_string()); }
             Err(e) => { return Err(e) }
         }
     }
@@ -565,8 +562,8 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.Subject"), Ok(String::from_str("String")));
-/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok(String::from_str("Date")));
+/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.Subject"), Ok("String".to_string()));
+/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok("Date".to_string()));
 /// ```
 pub fn get_tag_type(tag: &str) -> Result<String, str::Utf8Error> {
     // TODO: This should maybe return an enum(?) rather than a string.
@@ -575,7 +572,7 @@ pub fn get_tag_type(tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag);
         let tag_type = str::from_utf8(ffi::CStr::from_ptr(c_str_type).to_bytes());
         match tag_type {
-            Ok(v) => { return Ok(String::from_str(v)); }
+            Ok(v) => { return Ok(v.to_string()); }
             Err(e) => { return Err(e) }
         }
     }
