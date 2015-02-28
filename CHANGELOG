@@ -1,3 +1,9 @@
+2015-03-01 - v0.2.0
+  * The "get_tag_type" function now returns an item from an enum of data types.
+  * Some methods that used to return magic numbers on error now return Options.
+  * The "get_mime_type" method is renamed "get_media_type" for correctness.
+  * Custom Rational type replaced by common num::rational::Ratio.
+
 2015-02-25 - v0.1.0
   * First development release.
   * Added ability to set multiple string values for a tag.
