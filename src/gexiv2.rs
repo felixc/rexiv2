@@ -31,17 +31,17 @@ pub struct GExiv2Metadata;
 
 /// All the possible orientations for an image.
 #[repr(C)]
-#[derive(Copy)]
+#[derive(Copy, Debug, PartialEq, Eq)]
 pub enum Orientation {
-    Unspecified = 0,
-    Normal = 1,
-    HorizontalFlip = 2,
-    Rotate180 = 3,
-    VerticalFlip = 4,
-    Rotate90HorizontalFlip = 5,
-    Rotate90 = 6,
-    Rotate90VerticalFlip = 7,
-    Rotate270 = 8,
+    Unspecified,
+    Normal,
+    HorizontalFlip,
+    Rotate180,
+    VerticalFlip,
+    Rotate90HorizontalFlip,
+    Rotate90,
+    Rotate90VerticalFlip,
+    Rotate270,
 }
 
 #[link(name = "gexiv2")]

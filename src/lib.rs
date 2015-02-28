@@ -194,8 +194,8 @@ impl Metadata {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
             let mime = str::from_utf8(ffi::CStr::from_ptr(c_str_mime).to_bytes());
             match mime {
-                Ok(v) => { return Ok(v.to_string()); }
-                Err(e) => { return Err(e); }
+                Ok(v) => Ok(v.to_string()),
+                Err(e) => Err(e)
             }
         }
     }
@@ -334,8 +334,8 @@ impl Metadata {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag);
             let value = str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes());
             match value {
-                Ok(v) => { return Ok(v.to_string()); }
-                Err(e) => { return Err(e); }
+                Ok(v) => Ok(v.to_string()),
+                Err(e) => Err(e)
             }
         }
     }
@@ -360,8 +360,8 @@ impl Metadata {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag);
             let value = str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes());
             match value {
-                Ok(v) => { return Ok(v.to_string()); }
-                Err(e) => { return Err(e); }
+                Ok(v) => Ok(v.to_string()),
+                Err(e) => Err(e)
             }
         }
     }
@@ -585,8 +585,8 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag);
         let label = str::from_utf8(ffi::CStr::from_ptr(c_str_label).to_bytes());
         match label {
-            Ok(v) => { return Ok(v.to_string()); }
-            Err(e) => { return Err(e) }
+            Ok(v) => Ok(v.to_string()),
+            Err(e) => Err(e)
         }
     }
 }
@@ -604,8 +604,8 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag);
         let desc = str::from_utf8(ffi::CStr::from_ptr(c_str_desc).to_bytes());
         match desc {
-            Ok(v) => { return Ok(v.to_string()); }
-            Err(e) => { return Err(e) }
+            Ok(v) => Ok(v.to_string()),
+            Err(e) => Err(e)
         }
     }
 }
