@@ -71,6 +71,61 @@ pub struct GpsInfo {
     pub altitude: f64
 }
 
+/// The possible data types that a tag can have.
+#[derive(Copy, Debug, PartialEq, Eq)]
+pub enum TagType {
+    /// Exif BYTE type, 8-bit unsigned integer.
+    UnsignedByte,
+    /// Exif ASCII type, 8-bit byte.
+    AsciiString,
+    /// Exif SHORT type, 16-bit (2-byte) unsigned integer.
+    UnsignedShort,
+    /// Exif LONG type, 32-bit (4-byte) unsigned integer.
+    UnsignedLong,
+    /// Exif RATIONAL type, two LONGs: numerator and denumerator of a fraction.
+    UnsignedRational,
+    /// Exif SBYTE type, an 8-bit signed (twos-complement) integer.
+    SignedByte,
+    /// Exif UNDEFINED type, an 8-bit byte that may contain anything.
+    Undefined,
+    /// Exif SSHORT type, a 16-bit (2-byte) signed (twos-complement) integer.
+    SignedShort,
+    /// Exif SLONG type, a 32-bit (4-byte) signed (twos-complement) integer.
+    SignedLong,
+    /// Exif SRATIONAL type, two SLONGs: numerator and denumerator of a fraction.
+    SignedRational,
+    /// TIFF FLOAT type, single precision (4-byte) IEEE format.
+    TiffFloat,
+    /// TIFF DOUBLE type, double precision (8-byte) IEEE format.
+    TiffDouble,
+    /// TIFF IFD type, 32-bit (4-byte) unsigned integer.
+    TiffIfd,
+    /// IPTC string type.
+    String,
+    /// IPTC date type.
+    Date,
+    /// IPTC time type.
+    Time,
+    /// Exiv2 type for the Exif user comment.
+    Comment,
+    /// Exiv2 type for a CIFF directory.
+    Directory,
+    /// XMP text type.
+    XmpText,
+    /// XMP alternative type.
+    XmpAlt,
+    /// XMP bag type.
+    XmpBag,
+    /// XMP sequence type.
+    XmpSeq,
+    /// XMP language alternative type.
+    LangAlt,
+    /// Invalid type.
+    Invalid,
+    /// Unknown type.
+    Unknown
+}
+
 pub use gexiv2::Orientation;
 
 impl Metadata {
@@ -557,23 +612,45 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
 
 /// Determine the type of the given tag.
 ///
-/// Tag data types are [documented on the Exiv2 website](
-/// http://exiv2.org/doc/namespaceExiv2.html#5153319711f35fe81cbc13f4b852450c).
-///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.Subject"), Ok("String".to_string()));
-/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok("Date".to_string()));
+/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.Subject"), Ok(rexiv2::TagType::String));
+/// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok(rexiv2::TagType::Date));
 /// ```
-pub fn get_tag_type(tag: &str) -> Result<String, str::Utf8Error> {
-    // TODO: This should maybe return an enum(?) rather than a string.
+pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
     unsafe {
         let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag);
         let tag_type = str::from_utf8(ffi::CStr::from_ptr(c_str_type).to_bytes());
         match tag_type {
-            Ok(v) => { return Ok(v.to_string()); }
-            Err(e) => { return Err(e) }
+            Ok(v) => match v {
+                "Byte" => Ok(TagType::UnsignedByte),
+                "Ascii" => Ok(TagType::AsciiString),
+                "Short" => Ok(TagType::UnsignedShort),
+                "Long" => Ok(TagType::UnsignedLong),
+                "Rational" => Ok(TagType::UnsignedRational),
+                "SByte" => Ok(TagType::SignedByte),
+                "Undefined" => Ok(TagType::Undefined),
+                "SShort" => Ok(TagType::SignedShort),
+                "SLong" => Ok(TagType::SignedLong),
+                "SRational" => Ok(TagType::SignedRational),
+                "Float" => Ok(TagType::TiffFloat),
+                "Double" => Ok(TagType::TiffDouble),
+                "Ifd" => Ok(TagType::TiffIfd),
+                "String" => Ok(TagType::String),
+                "Date" => Ok(TagType::Date),
+                "Time" => Ok(TagType::Time),
+                "Comment" => Ok(TagType::Comment),
+                "Directory" => Ok(TagType::Directory),
+                "XmpText" => Ok(TagType::XmpText),
+                "XmpAlt" => Ok(TagType::XmpAlt),
+                "XmpBag" => Ok(TagType::XmpBag),
+                "XmpSeq" => Ok(TagType::XmpSeq),
+                "LangAlt" => Ok(TagType::LangAlt),
+                "Invalid" => Ok(TagType::Invalid),
+                _ => Ok(TagType::Unknown)
+            },
+            Err(e) => Err(e)
         }
     }
 }
