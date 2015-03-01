@@ -57,7 +57,7 @@ pub struct Metadata {
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
-#[derive(Copy)]
+#[derive(Copy, Debug)]
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
@@ -419,8 +419,8 @@ impl Metadata {
     pub fn get_exif_tag_rational(&self, tag: &str) -> Option<num::rational::Ratio<i32>> {
         unsafe {
             let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-            let num: *mut i32 = ptr::null_mut();
-            let den: *mut i32 = ptr::null_mut();
+            let ref mut num = 0;
+            let ref mut den = 0;
             let ok = gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag, num, den);
             if !ok {
                 return None
@@ -458,8 +458,8 @@ impl Metadata {
     /// Returns the camera exposure time of the photograph.
     pub fn get_exposure_time(&self) -> Option<num::rational::Ratio<i32>> {
         unsafe {
-            let num: *mut i32 = ptr::null_mut();
-            let den: *mut i32 = ptr::null_mut();
+            let ref mut num = 0;
+            let ref mut den = 0;
             let ok = gexiv2::gexiv2_metadata_get_exposure_time(self.raw, num, den);
             if !ok {
                 return None
@@ -509,9 +509,9 @@ impl Metadata {
     /// Retrieve the stored GPS information from the loaded file.
     pub fn get_gps_info(&self) -> Option<GpsInfo> {
         unsafe {
-            let lon: *mut f64 = ptr::null_mut();
-            let lat: *mut f64 = ptr::null_mut();
-            let alt: *mut f64 = ptr::null_mut();
+            let ref mut lon = 0.0;
+            let ref mut lat = 0.0;
+            let ref mut alt = 0.0;
             let ok = gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt);
             if !ok {
                 return None
