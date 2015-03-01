@@ -388,7 +388,7 @@ impl Metadata {
             let c_strs: Result<Vec<_>, _> = values.iter().map(|&s| ffi::CString::new(s)).collect();
             let c_strs = c_strs.unwrap();
             let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
-            ptrs.push(0 as *const i8);
+            ptrs.push(ptr::null());
             gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag, ptrs.as_ptr())
         }
     }
