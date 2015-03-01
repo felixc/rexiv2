@@ -476,22 +476,37 @@ impl Metadata {
         }
     }
 
-    /// Returns the camera f-number of the photograph.
-    pub fn get_fnumber(&self) -> f64 {
-        // TODO: Handle missing data better, instead of returning -1.0
-        unsafe { gexiv2::gexiv2_metadata_get_fnumber(self.raw) }
+    /// Returns the f-number used by the camera taking the photograph.
+    pub fn get_fnumber(&self) -> Option<f64> {
+        unsafe {
+            let fnumber = gexiv2::gexiv2_metadata_get_fnumber(self.raw);
+            if fnumber == -1.0 {
+                return None;
+            }
+            Some(fnumber)
+        }
     }
 
-    /// Returns the camera focal length of the photograph.
-    pub fn get_focal_length(&self) -> f64 {
-        // TODO: Handle missing data better, instead of returning -1.0
-        unsafe { gexiv2::gexiv2_metadata_get_focal_length(self.raw) }
+    /// Returns the focal length used by the camera taking the photograph.
+    pub fn get_focal_length(&self) -> Option<f64> {
+        unsafe {
+            let focal = gexiv2::gexiv2_metadata_get_focal_length(self.raw);
+            if focal == -1.0 {
+                return None;
+            }
+            Some(focal)
+        }
     }
 
-    /// Returns the camera ISO speed of the photograph.
-    pub fn get_iso_speed(&self) -> i32 {
-        // TODO: Handle missing data better, instead of returning 0.
-        unsafe { gexiv2::gexiv2_metadata_get_iso_speed(self.raw) }
+    /// Returns the ISO speed used by the camera taking the photograph.
+    pub fn get_iso_speed(&self) -> Option<i32> {
+        unsafe {
+            let speed = gexiv2::gexiv2_metadata_get_iso_speed(self.raw);
+            if speed == 0 {
+                return None;
+            }
+            Some(speed)
+        }
     }
 
 
