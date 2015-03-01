@@ -186,10 +186,9 @@ impl Metadata {
         unsafe { gexiv2::gexiv2_metadata_get_supports_xmp(self.raw) }
     }
 
-    /// Return the MIME type of the loaded file.
-    pub fn get_mime_type(&self) -> Result<String, str::Utf8Error> {
+    /// Return the Internet Media Type of the loaded file.
+    pub fn get_media_type(&self) -> Result<String, str::Utf8Error> {
         // TODO: Return an enum?
-        // TODO: Rename? Media Type?
         unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
             let mime = str::from_utf8(ffi::CStr::from_ptr(c_str_mime).to_bytes());
