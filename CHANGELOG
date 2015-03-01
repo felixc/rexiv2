@@ -1,3 +1,7 @@
+2015-03-02 - v0.2.1
+  * Added support for loading metadata from byte-array data buffers.
+  * Split gexiv2 FFI declarations off into separate gexiv2-sys crate dependency.
+
 2015-03-01 - v0.2.0
   * The "get_tag_type" function now returns an item from an enum of data types.
   * Some methods that used to return magic numbers on error now return Options.
