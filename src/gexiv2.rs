@@ -50,6 +50,7 @@ extern {
     pub fn gexiv2_metadata_new() -> *mut GExiv2Metadata;
     pub fn gexiv2_metadata_free(this: *mut GExiv2Metadata);
     pub fn gexiv2_metadata_open_path(this: *mut GExiv2Metadata, path: *const c_char, error: *mut *mut GError) -> bool;
+    pub fn gexiv2_metadata_open_buf(Gthis: *mut GExiv2Metadata, data: *const u8, data_len: c_long, error: *mut *mut GError) -> bool;
     pub fn gexiv2_metadata_save_file(this: *mut GExiv2Metadata, path: *const c_char, error: *mut *mut GError) -> bool;
 
     // Image information.

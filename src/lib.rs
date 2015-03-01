@@ -123,13 +123,52 @@ pub use gexiv2::Orientation;
 
 impl Metadata {
     /// Load the metadata from the file found at the given path.
+    ///
+    /// # Examples
+    /// ```no_run
+    /// let path = "myphoto.jpg";
+    /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
+    /// assert_eq!(meta.get_media_type().unwrap(), "image/jpeg".to_string());
+    /// ```
     pub fn new_from_path(path: &str) -> Result<Metadata, String> {
         unsafe {
             let mut err: *mut gexiv2::GError = ptr::null_mut();
             let c_str_path = ffi::CString::new(path).unwrap().as_ptr();
             let metadata = gexiv2::gexiv2_metadata_new();
-            let ok = gexiv2::gexiv2_metadata_open_path(
-                metadata, c_str_path, &mut err);
+            let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path, &mut err);
+            if !ok {
+                let err_msg = str::from_utf8(ffi::CStr::from_ptr((*err).message).to_bytes());
+                match err_msg {
+                    Ok(v) => { return Err(v.to_string()); }
+                    Err(_) => { return Err("Unknown error".to_string()); }
+                }
+            }
+            Ok(Metadata { raw: metadata })
+        }
+    }
+
+    /// Load the metadata from the given data buffer.
+    ///
+    /// # Examples
+    /// ```
+    /// # extern crate rexiv2;
+    /// extern crate "rustc-serialize" as serialize;
+    /// use serialize::hex::FromHex;
+    ///
+    /// # fn main() {
+    /// let minipng = "89504e470d0a1a0a0000000d49484452000000010000000108000000\
+    ///                003a7e9b550000000a4944415408d763f80f00010101001bb6ee5600\
+    ///                00000049454e44ae426082".from_hex().unwrap();
+    /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_media_type().unwrap(), "image/png".to_string());
+    /// # }
+    /// ```
+    pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, String> {
+        unsafe {
+            let mut err: *mut gexiv2::GError = ptr::null_mut();
+            let metadata = gexiv2::gexiv2_metadata_new();
+            let ok = gexiv2::gexiv2_metadata_open_buf(
+                metadata, data.as_ptr(), data.len() as i64, &mut err);
             if !ok {
                 let err_msg = str::from_utf8(ffi::CStr::from_ptr((*err).message).to_bytes());
                 match err_msg {
