@@ -15,3 +15,6 @@ homepage = "https://github.com/felixc/rexiv2"
 repository = "https://github.com/felixc/rexiv2"
 keywords = ["metadata", "exif", "iptc", "xmp", "photo"]
 readme = "README.md"
+
+[dependencies]
+num = "*"  # TODO: Once Rust & this crate are stable, use specific version

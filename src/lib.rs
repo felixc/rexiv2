@@ -45,6 +45,8 @@
 
 mod gexiv2;
 
+extern crate num;
+
 use std::ffi;
 use std::ptr;
 use std::str;
@@ -52,15 +54,6 @@ use std::str;
 /// An opaque structure that serves as a container for a media file's metadata.
 pub struct Metadata {
     raw: *mut gexiv2::GExiv2Metadata
-}
-
-/// A rational number in the form of a numerator over a non-zero denominator.
-///
-/// Some metadata tags are stored in this format.
-#[derive(Copy)]
-pub struct Rational {
-    pub numerator: i32,
-    pub denominator: i32
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
@@ -423,7 +416,7 @@ impl Metadata {
     /// Get the value of an Exif tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn get_exif_tag_rational(&self, tag: &str) -> Option<Rational> {
+    pub fn get_exif_tag_rational(&self, tag: &str) -> Option<num::rational::Ratio<i32>> {
         unsafe {
             let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
             let num: *mut i32 = ptr::null_mut();
@@ -432,18 +425,18 @@ impl Metadata {
             if !ok {
                 return None
             }
-            Some(Rational { numerator: *num, denominator: *den })
+            Some(num::rational::Ratio::new(*num, *den))
         }
     }
 
     /// Set the value of an Exif tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn set_exif_tag_rational(&self, tag: &str, value: &Rational) -> bool {
+    pub fn set_exif_tag_rational(&self, tag: &str, value: &num::rational::Ratio<i32>) -> bool {
         unsafe {
             let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
             gexiv2::gexiv2_metadata_set_exif_tag_rational(
-                self.raw, c_str_tag, value.numerator, value.denominator)
+                self.raw, c_str_tag, *value.numer(), *value.denom())
         }
     }
 
@@ -463,7 +456,7 @@ impl Metadata {
     }
 
     /// Returns the camera exposure time of the photograph.
-    pub fn get_exposure_time(&self) -> Option<Rational> {
+    pub fn get_exposure_time(&self) -> Option<num::rational::Ratio<i32>> {
         unsafe {
             let num: *mut i32 = ptr::null_mut();
             let den: *mut i32 = ptr::null_mut();
@@ -471,7 +464,7 @@ impl Metadata {
             if !ok {
                 return None
             }
-            Some(Rational { numerator: *num, denominator: *den })
+            Some(num::rational::Ratio::new(*num, *den))
         }
     }
 
