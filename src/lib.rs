@@ -20,8 +20,6 @@
 //!
 //! Most functionality is exposed through methods on the [`Metadata`][struct-meta] type.
 //!
-//! This version of the library wraps gexiv2 version 0.9.0.
-//!
 //! ## Usage
 //! A typical use of the library might look something like this:
 //!
@@ -40,11 +38,9 @@
 #![crate_name = "rexiv2"]
 
 #![feature(core)]         // TODO: Remove once stabilized.
-#![feature(libc)]         // TODO: Remove once stabilized.
 #![feature(std_misc)]     // TODO: Remove once stabilized.
 
-mod gexiv2;
-
+extern crate "gexiv2-sys" as gexiv2;
 extern crate num;
 
 use std::ffi;

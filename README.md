@@ -5,9 +5,9 @@ Rust library for working with media file metadata
 -------------------------------------------------
 
 This library provides a Rust wrapper around the [gexiv2][gexiv2] library,
-which is itself a GObject-based wrapper around the [Exiv2][exiv2] library,
-which provides read and write access to the Exif, XMP, and IPTC metadata
-for media files (typically photos) in various formats.
+which is a GObject-based wrapper around the [Exiv2][exiv2] library, which
+provides read and write access to the Exif, XMP, and IPTC metadata in media
+files (typically photos) in various formats.
 
 [gexiv2]: https://wiki.gnome.org/Projects/gexiv2
 [exiv2]:  http://www.exiv2.org/
@@ -42,9 +42,10 @@ code. You can download these dependencies from their download pages:
 [Exiv2][exiv2-dl]; [gexiv2][gexiv2-dl].
 
 On a Linux system, you can typically install these dependencies through your
-package manager. Mac OS X users may also have this option through unofficial
-package management systems. Note that to build rexiv2 from source you may need
-not just the library packages, but the “dev” versions of them as well.
+package manager (look for packages with names like “libgexiv2-dev”). Mac OS X
+users may also have this option through unofficial package management systems.
+Note that to build rexiv2 from source you may need not just the library
+packages, but the “dev” versions of them as well.
 
 [exiv2-dl]:  http://www.exiv2.org/download.html
 [gexiv2-dl]: https://wiki.gnome.org/Projects/gexiv2/BuildingAndInstalling
