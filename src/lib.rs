@@ -40,7 +40,7 @@
 #![feature(core)]         // TODO: Remove once stabilized.
 #![feature(std_misc)]     // TODO: Remove once stabilized.
 
-extern crate "gexiv2-sys" as gexiv2;
+extern crate gexiv2_sys as gexiv2;
 extern crate num;
 
 use std::ffi;
@@ -148,8 +148,8 @@ impl Metadata {
     /// # Examples
     /// ```
     /// # extern crate rexiv2;
-    /// extern crate "rustc-serialize" as serialize;
-    /// use serialize::hex::FromHex;
+    /// extern crate rustc_serialize;
+    /// use rustc_serialize::hex::FromHex;
     ///
     /// # fn main() {
     /// let minipng = "89504e470d0a1a0a0000000d49484452000000010000000108000000\
