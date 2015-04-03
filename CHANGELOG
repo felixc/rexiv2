@@ -1,3 +1,7 @@
+2015-04-03 - v0.2.2
+  * Updated to work with 1.0.0-nightly (d17d6e7f1 2015-04-02) (Note: not Beta!).
+  * More permissive and up-to-date dependency version requirements.
+
 2015-03-02 - v0.2.1
   * Added support for loading metadata from byte-array data buffers.
   * Split gexiv2 FFI declarations off into separate gexiv2-sys crate dependency.
