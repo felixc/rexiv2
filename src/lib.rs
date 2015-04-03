@@ -52,7 +52,7 @@ pub struct Metadata {
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
-#[derive(Copy, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
@@ -60,7 +60,7 @@ pub struct GpsInfo {
 }
 
 /// The possible data types that a tag can have.
-#[derive(Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TagType {
     /// Exif BYTE type, 8-bit unsigned integer.
     UnsignedByte,
