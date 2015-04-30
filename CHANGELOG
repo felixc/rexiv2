@@ -1,3 +1,6 @@
+2015-04-30 - v0.2.3
+  * Library now builds with regular stable rustc.
+
 2015-04-03 - v0.2.2
   * Updated to work with 1.0.0-nightly (d17d6e7f1 2015-04-02) (Note: not Beta!).
   * More permissive and up-to-date dependency version requirements.
