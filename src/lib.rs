@@ -37,8 +37,6 @@
 #![crate_type = "lib"]
 #![crate_name = "rexiv2"]
 
-#![feature(core)]         // TODO: Remove once stabilized.
-
 extern crate gexiv2_sys as gexiv2;
 extern crate num;
 
