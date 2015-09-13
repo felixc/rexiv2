@@ -422,7 +422,7 @@ impl Metadata {
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
         match unsafe { gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag.as_ptr(),
-                                                                ptrs.as_ptr()) } {
+                                                                ptrs.as_mut_ptr()) } {
             false => Err(()),
             true => Ok(())
         }
