@@ -1,3 +1,8 @@
+2015-09-13 - v0.3.0
+  * All instances of success/failure boolean return values are now Results.
+  * Fixed critical bug that caused dangling pointers and mysterious errors.
+  * Updated to use latest gexiv2-sys FFI declarations.
+
 2015-04-30 - v0.2.3
   * Library now builds with regular stable rustc.
 
