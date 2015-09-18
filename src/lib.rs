@@ -376,11 +376,9 @@ impl Metadata {
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
-        match unsafe { gexiv2::gexiv2_metadata_set_tag_string(self.raw, c_str_tag.as_ptr(),
-                                                              c_str_val.as_ptr()) } {
-            false => Err(()),
-            true => Ok(())
-        }
+        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
+                                                                       c_str_tag.as_ptr(),
+                                                                       c_str_val.as_ptr())) }
     }
 
     /// Get the value of a tag as a string, potentially formatted for user-visible display.
@@ -430,11 +428,9 @@ impl Metadata {
         let c_strs = c_strs.unwrap();
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
-        match unsafe { gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag.as_ptr(),
-                                                                ptrs.as_mut_ptr()) } {
-            false => Err(()),
-            true => Ok(())
-        }
+        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
+                                                                         c_str_tag.as_ptr(),
+                                                                         ptrs.as_mut_ptr())) }
     }
 
     /// Get the value of a tag as a long.
@@ -450,10 +446,8 @@ impl Metadata {
     /// Only safe if the tag is really of a numeric type.
     pub fn set_tag_long(&self, tag: &str, value: i64) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        match unsafe { gexiv2::gexiv2_metadata_set_tag_long(self.raw, c_str_tag.as_ptr(), value) } {
-            false => Err(()),
-            true => Ok(())
-        }
+        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
+                                                                     c_str_tag.as_ptr(), value)) }
     }
 
     /// Get the value of an Exif tag as a Rational.
@@ -476,12 +470,10 @@ impl Metadata {
     pub fn set_exif_tag_rational(&self,
                                  tag: &str, value: &num::rational::Ratio<i32>) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        match unsafe { gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw, c_str_tag.as_ptr(),
-                                                                     *value.numer(),
-                                                                     *value.denom()) } {
-            false => Err(()),
-            true => Ok(())
-        }
+        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
+                                                                              c_str_tag.as_ptr(),
+                                                                              *value.numer(),
+                                                                              *value.denom())) }
     }
 
 
@@ -551,11 +543,8 @@ impl Metadata {
 
     /// Save the specified GPS values to the metadata.
     pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<(), ()> {
-        match unsafe { gexiv2::gexiv2_metadata_set_gps_info(self.raw, gps.longitude,
-                                                            gps.latitude, gps.altitude) } {
-            false => Err(()),
-            true => Ok(())
-        }
+        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw, gps.longitude,
+                                                                     gps.latitude, gps.altitude)) }
     }
 
     /// Remove all saved GPS information from the metadata.
@@ -689,20 +678,14 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap();
     let c_str_prefix = ffi::CString::new(prefix).unwrap();
-    match unsafe { gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name.as_ptr(),
-                                                                  c_str_prefix.as_ptr()) } {
-        false => Err(()),
-        true => Ok(())
-    }
+    unsafe { bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name.as_ptr(),
+                                                                           c_str_prefix.as_ptr())) }
 }
 
 /// Remove an XMP namespace from the set of known ones.
 pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap();
-    match unsafe { gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name.as_ptr()) } {
-        false => Err(()),
-        true => Ok(())
-    }
+    unsafe { bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name.as_ptr())) }
 }
 
 /// Forget all known XMP namespaces.
@@ -719,5 +702,13 @@ fn free_array_of_pointers(list: *mut *mut libc::c_void) {
             idx += 1;
         }
         libc::free(list as *mut libc::c_void);
+    }
+}
+
+/// Convert a success/failure boolean into a Result.
+fn bool_to_result(success: bool) -> Result<(), ()> {
+    return match success {
+        true => Ok(()),
+        false => Err(())
     }
 }
