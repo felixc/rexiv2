@@ -38,6 +38,7 @@
 #![crate_name = "rexiv2"]
 
 extern crate gexiv2_sys as gexiv2;
+extern crate libc;
 extern crate num;
 
 use std::ffi;
@@ -282,10 +283,14 @@ impl Metadata {
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
                     Ok(v) => { tags.push(v.to_string()); }
-                    Err(e) => { return Err(e); }
+                    Err(e) => {
+                        free_array_of_pointers(c_tags as *mut *mut libc::c_void);
+                        return Err(e);
+                    }
                 }
                 cur_offset += 1;
             }
+            free_array_of_pointers(c_tags as *mut *mut libc::c_void);
         }
         Ok(tags)
     }
@@ -311,10 +316,14 @@ impl Metadata {
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
                     Ok(v) => { tags.push(v.to_string()); }
-                    Err(e) => { return Err(e); }
+                    Err(e) => {
+                        free_array_of_pointers(c_tags as *mut *mut libc::c_void);
+                        return Err(e);
+                    }
                 }
                 cur_offset += 1;
             }
+            free_array_of_pointers(c_tags as *mut *mut libc::c_void);
         }
         Ok(tags)
     }
@@ -340,10 +349,14 @@ impl Metadata {
                     ffi::CStr::from_ptr((*c_tags.offset(cur_offset))).to_bytes());
                 match tag {
                     Ok(v) => { tags.push(v.to_string()); }
-                    Err(e) => { return Err(e); }
+                    Err(e) => {
+                        free_array_of_pointers(c_tags as *mut *mut libc::c_void);
+                        return Err(e);
+                    }
                 }
                 cur_offset += 1;
             }
+            free_array_of_pointers(c_tags as *mut *mut libc::c_void);
         }
         Ok(tags)
     }
@@ -353,13 +366,11 @@ impl Metadata {
     /// Only safe if the tag is really of a string type.
     pub fn get_tag_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        let value = unsafe {
+        unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
-            str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes())
-        };
-        match value {
-            Ok(v) => Ok(v.to_string()),
-            Err(e) => Err(e)
+            let value = try!(str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes())).to_string();
+            libc::free(c_str_val as *mut libc::c_void);
+            Ok(value)
         }
     }
 
@@ -381,14 +392,12 @@ impl Metadata {
     /// Only safe if the tag is really of a string type.
     pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        let value = unsafe {
+        unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
                                                                                c_str_tag.as_ptr());
-            str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes())
-        };
-        match value {
-            Ok(v) => Ok(v.to_string()),
-            Err(e) => Err(e)
+            let value = try!(str::from_utf8(ffi::CStr::from_ptr(c_str_val).to_bytes())).to_string();
+            libc::free(c_str_val as *mut libc::c_void);
+            Ok(value)
         }
     }
 
@@ -406,10 +415,14 @@ impl Metadata {
                     ffi::CStr::from_ptr((*c_vals.offset(cur_offset))).to_bytes());
                 match value {
                     Ok(v) => { vals.push(v.to_string()); }
-                    Err(e) => { return Err(e); }
+                    Err(e) => {
+                        free_array_of_pointers(c_vals as *mut *mut libc::c_void);
+                        return Err(e);
+                    }
                 }
                 cur_offset += 1;
             }
+            free_array_of_pointers(c_vals as *mut *mut libc::c_void);
         }
         Ok(vals)
     }
@@ -710,4 +723,16 @@ pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
 /// Forget all known XMP namespaces.
 pub fn unregister_all_xmp_namespaces() {
     unsafe { gexiv2::gexiv2_metadata_unregister_all_xmp_namespaces() }
+}
+
+/// Helper function to free an array of pointers, such as those returned by some gexiv2 functions.
+fn free_array_of_pointers(list: *mut *mut libc::c_void) {
+    unsafe {
+        let mut idx = 0;
+        while !(*list.offset(idx)).is_null() {
+            libc::free(*list.offset(idx));
+            idx += 1;
+        }
+        libc::free(list as *mut libc::c_void);
+    }
 }
