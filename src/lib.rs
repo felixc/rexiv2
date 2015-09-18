@@ -214,13 +214,9 @@ impl Metadata {
     /// Return the Internet Media Type of the loaded file.
     pub fn get_media_type(&self) -> Result<String, str::Utf8Error> {
         // TODO: Return an enum?
-        let media_type = unsafe {
+        unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
-            str::from_utf8(ffi::CStr::from_ptr(c_str_mime).to_bytes())
-        };
-        match media_type {
-            Ok(t) => Ok(t.to_string()),
-            Err(e) => Err(e)
+            Ok(try!(str::from_utf8(ffi::CStr::from_ptr(c_str_mime).to_bytes())).to_string())
         }
     }
 
@@ -622,13 +618,9 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 /// ```
 pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
-    let label = unsafe {
+    unsafe {
         let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
-        str::from_utf8(ffi::CStr::from_ptr(c_str_label).to_bytes())
-    };
-    match label {
-        Ok(v) => Ok(v.to_string()),
-        Err(e) => Err(e)
+        Ok(try!(str::from_utf8(ffi::CStr::from_ptr(c_str_label).to_bytes())).to_string())
     }
 }
 
@@ -641,13 +633,9 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
-    let desc = unsafe {
+    unsafe {
         let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
-        str::from_utf8(ffi::CStr::from_ptr(c_str_desc).to_bytes())
-    };
-    match desc {
-        Ok(v) => Ok(v.to_string()),
-        Err(e) => Err(e)
+        Ok(try!(str::from_utf8(ffi::CStr::from_ptr(c_str_desc).to_bytes())).to_string())
     }
 }
 
@@ -662,37 +650,34 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     let tag_type = unsafe {
         let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
-        str::from_utf8(ffi::CStr::from_ptr(c_str_type).to_bytes())
+        try!(str::from_utf8(ffi::CStr::from_ptr(c_str_type).to_bytes()))
     };
-    match tag_type {
-        Ok(v) => match v {
-            "Byte" => Ok(TagType::UnsignedByte),
-            "Ascii" => Ok(TagType::AsciiString),
-            "Short" => Ok(TagType::UnsignedShort),
-            "Long" => Ok(TagType::UnsignedLong),
-            "Rational" => Ok(TagType::UnsignedRational),
-            "SByte" => Ok(TagType::SignedByte),
-            "Undefined" => Ok(TagType::Undefined),
-            "SShort" => Ok(TagType::SignedShort),
-            "SLong" => Ok(TagType::SignedLong),
-            "SRational" => Ok(TagType::SignedRational),
-            "Float" => Ok(TagType::TiffFloat),
-            "Double" => Ok(TagType::TiffDouble),
-            "Ifd" => Ok(TagType::TiffIfd),
-            "String" => Ok(TagType::String),
-            "Date" => Ok(TagType::Date),
-            "Time" => Ok(TagType::Time),
-            "Comment" => Ok(TagType::Comment),
-            "Directory" => Ok(TagType::Directory),
-            "XmpText" => Ok(TagType::XmpText),
-            "XmpAlt" => Ok(TagType::XmpAlt),
-            "XmpBag" => Ok(TagType::XmpBag),
-            "XmpSeq" => Ok(TagType::XmpSeq),
-            "LangAlt" => Ok(TagType::LangAlt),
-            "Invalid" => Ok(TagType::Invalid),
-            _ => Ok(TagType::Unknown)
-        },
-        Err(e) => Err(e)
+   return match tag_type {
+        "Byte" => Ok(TagType::UnsignedByte),
+        "Ascii" => Ok(TagType::AsciiString),
+        "Short" => Ok(TagType::UnsignedShort),
+        "Long" => Ok(TagType::UnsignedLong),
+        "Rational" => Ok(TagType::UnsignedRational),
+        "SByte" => Ok(TagType::SignedByte),
+        "Undefined" => Ok(TagType::Undefined),
+        "SShort" => Ok(TagType::SignedShort),
+        "SLong" => Ok(TagType::SignedLong),
+        "SRational" => Ok(TagType::SignedRational),
+        "Float" => Ok(TagType::TiffFloat),
+        "Double" => Ok(TagType::TiffDouble),
+        "Ifd" => Ok(TagType::TiffIfd),
+        "String" => Ok(TagType::String),
+        "Date" => Ok(TagType::Date),
+        "Time" => Ok(TagType::Time),
+        "Comment" => Ok(TagType::Comment),
+        "Directory" => Ok(TagType::Directory),
+        "XmpText" => Ok(TagType::XmpText),
+        "XmpAlt" => Ok(TagType::XmpAlt),
+        "XmpBag" => Ok(TagType::XmpBag),
+        "XmpSeq" => Ok(TagType::XmpSeq),
+        "LangAlt" => Ok(TagType::LangAlt),
+        "Invalid" => Ok(TagType::Invalid),
+        _ => Ok(TagType::Unknown)
     }
 }
 
