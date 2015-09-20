@@ -1,3 +1,6 @@
+2015-09-20 - v0.3.1
+  * Fixed memory leak of some values returned over FFI boundary.
+
 2015-09-13 - v0.3.0
   * All instances of success/failure boolean return values are now Results.
   * Fixed critical bug that caused dangling pointers and mysterious errors.
