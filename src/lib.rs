@@ -145,17 +145,12 @@ impl Metadata {
     ///
     /// # Examples
     /// ```
-    /// # extern crate rexiv2;
-    /// extern crate rustc_serialize;
-    /// use rustc_serialize::hex::FromHex;
-    ///
-    /// # fn main() {
-    /// let minipng = "89504e470d0a1a0a0000000d49484452000000010000000108000000\
-    ///                003a7e9b550000000a4944415408d763f80f00010101001bb6ee5600\
-    ///                00000049454e44ae426082".from_hex().unwrap();
+    /// let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0, 1,
+    ///                0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65, 84,
+    ///                8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73, 69,
+    ///                78, 68, 174, 66, 96, 130];
     /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// assert_eq!(meta.get_media_type().unwrap(), "image/png".to_string());
-    /// # }
     /// ```
     pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
