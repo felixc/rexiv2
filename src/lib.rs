@@ -41,13 +41,14 @@ extern crate gexiv2_sys as gexiv2;
 extern crate libc;
 extern crate num;
 
+use num::rational;
 use std::ffi;
 use std::ptr;
 use std::str;
 
 /// An opaque structure that serves as a container for a media file's metadata.
 pub struct Metadata {
-    raw: *mut gexiv2::GExiv2Metadata
+    raw: *mut gexiv2::GExiv2Metadata,
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
@@ -55,7 +56,7 @@ pub struct Metadata {
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
-    pub altitude: f64
+    pub altitude: f64,
 }
 
 /// The possible data types that a tag can have.
@@ -110,7 +111,7 @@ pub enum TagType {
     /// Invalid type.
     Invalid,
     /// Unknown type.
-    Unknown
+    Unknown,
 }
 
 pub use gexiv2::Orientation;
@@ -132,10 +133,10 @@ impl Metadata {
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path, &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                match err_msg {
-                    Ok(v) => { return Err(v.to_string()); }
-                    Err(_) => { return Err("Unknown error".to_string()); }
-                }
+                return match err_msg {
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
+                };
             }
             Ok(Metadata { raw: metadata })
         }
@@ -160,10 +161,10 @@ impl Metadata {
                 metadata, data.as_ptr(), data.len() as i64, &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                match err_msg {
-                    Ok(v) => { return Err(v.to_string()); }
-                    Err(_) => { return Err("Unknown error".to_string()); }
-                }
+                return match err_msg {
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
+                };
             }
             Ok(Metadata { raw: metadata })
         }
@@ -177,19 +178,17 @@ impl Metadata {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path, &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                match err_msg {
-                    Ok(v) => { return Err(v.to_string()); }
-                    Err(_) => { return Err("Unknown error".to_string()); }
-                }
+                return match err_msg {
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
+                };
             }
             Ok(())
         }
     }
 
 
-    //
     // Image information.
-    //
 
     /// Determine whether the type of file loaded supports Exif metadata.
     pub fn supports_exif(&self) -> bool {
@@ -232,9 +231,7 @@ impl Metadata {
     }
 
 
-    //
     // Tag management.
-    //
 
     /// Indicates whether the given tag is present/populated in the loaded metadata.
     pub fn has_tag(&self, tag: &str) -> bool {
@@ -272,7 +269,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => { tags.push(v.to_string()); }
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -304,7 +301,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => { tags.push(v.to_string()); }
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -336,7 +333,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => { tags.push(v.to_string()); }
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -398,7 +395,7 @@ impl Metadata {
             while !(*c_vals.offset(cur_offset)).is_null() {
                 let value = ffi::CStr::from_ptr(*c_vals.offset(cur_offset)).to_str();
                 match value {
-                    Ok(v) => { vals.push(v.to_string()); }
+                    Ok(v) => vals.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_vals as *mut *mut libc::c_void);
                         return Err(e);
@@ -442,22 +439,21 @@ impl Metadata {
     /// Get the value of an Exif tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn get_exif_tag_rational(&self, tag: &str) -> Option<num::rational::Ratio<i32>> {
+    pub fn get_exif_tag_rational(&self, tag: &str) -> Option<rational::Ratio<i32>> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
         let ref mut num = 0;
         let ref mut den = 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag,
                                                                      num, den) } {
             0 => None,
-            _ => Some(num::rational::Ratio::new(*num, *den))
+            _ => Some(rational::Ratio::new(*num, *den)),
         }
     }
 
     /// Set the value of an Exif tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn set_exif_tag_rational(&self,
-                                 tag: &str, value: &num::rational::Ratio<i32>) -> Result<(), ()> {
+    pub fn set_exif_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
                                                                                   c_str_tag,
@@ -466,9 +462,7 @@ impl Metadata {
     }
 
 
-    //
     // Helper & convenience getters/setters.
-    //
 
     /// Find out the orientation the image should have, according to the metadata tag.
     pub fn get_orientation(&self) -> Orientation {
@@ -481,12 +475,12 @@ impl Metadata {
     }
 
     /// Returns the camera exposure time of the photograph.
-    pub fn get_exposure_time(&self) -> Option<num::rational::Ratio<i32>> {
+    pub fn get_exposure_time(&self) -> Option<rational::Ratio<i32>> {
         let ref mut num = 0;
         let ref mut den = 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exposure_time(self.raw, num, den) } {
             0 => None,
-            _ => Some(num::rational::Ratio::new(*num, *den))
+            _ => Some(rational::Ratio::new(*num, *den)),
         }
     }
 
@@ -494,7 +488,7 @@ impl Metadata {
     pub fn get_fnumber(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_fnumber(self.raw) } {
             -1.0 => return None,
-            fnumber => Some(fnumber)
+            fnumber => Some(fnumber),
         }
     }
 
@@ -502,7 +496,7 @@ impl Metadata {
     pub fn get_focal_length(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_focal_length(self.raw) } {
             -1.0 => None,
-            focal => Some(focal)
+            focal => Some(focal),
         }
     }
 
@@ -510,14 +504,12 @@ impl Metadata {
     pub fn get_iso_speed(&self) -> Option<i32> {
         match unsafe { gexiv2::gexiv2_metadata_get_iso_speed(self.raw) } {
             0 => None,
-            speed => Some(speed)
+            speed => Some(speed),
         }
     }
 
 
-    //
     // GPS-related methods.
-    //
 
     /// Retrieve the stored GPS information from the loaded file.
     pub fn get_gps_info(&self) -> Option<GpsInfo> {
@@ -526,7 +518,7 @@ impl Metadata {
         let ref mut alt = 0.0;
         match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
             0 => None,
-            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt })
+            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt }),
         }
     }
 
@@ -546,13 +538,11 @@ impl Metadata {
 
 impl Drop for Metadata {
     fn drop(&mut self) {
-        unsafe { gexiv2::gexiv2_metadata_free(self.raw); }
+        unsafe { gexiv2::gexiv2_metadata_free(self.raw) }
     }
 }
 
-//
 // Tag information.
-//
 
 /// Indicates whether the given tag is from the Exif domain.
 ///
@@ -657,13 +647,11 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
         "XmpSeq" => Ok(TagType::XmpSeq),
         "LangAlt" => Ok(TagType::LangAlt),
         "Invalid" => Ok(TagType::Invalid),
-        _ => Ok(TagType::Unknown)
-    }
+        _ => Ok(TagType::Unknown),
+    };
 }
 
-//
 // XMP namespace management.
-//
 
 /// Add a new XMP namespace for tags to exist under.
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
@@ -698,8 +686,8 @@ fn free_array_of_pointers(list: *mut *mut libc::c_void) {
 
 /// Convert a success/failure integer representing a boolean into a Result.
 fn int_bool_to_result(success: libc::c_int) -> Result<(), ()> {
-    return match success {
+    match success {
         0 => Err(()),
-        _ => Ok(())
+        _ => Ok(()),
     }
 }
