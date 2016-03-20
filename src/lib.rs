@@ -130,7 +130,7 @@ impl Metadata {
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path, &mut err);
-            if !ok {
+            if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 match err_msg {
                     Ok(v) => { return Err(v.to_string()); }
@@ -158,7 +158,7 @@ impl Metadata {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_buf(
                 metadata, data.as_ptr(), data.len() as i64, &mut err);
-            if !ok {
+            if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 match err_msg {
                     Ok(v) => { return Err(v.to_string()); }
@@ -175,7 +175,7 @@ impl Metadata {
         let c_str_path = ffi::CString::new(path).unwrap().as_ptr();
         unsafe {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path, &mut err);
-            if !ok {
+            if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 match err_msg {
                     Ok(v) => { return Err(v.to_string()); }
@@ -193,17 +193,17 @@ impl Metadata {
 
     /// Determine whether the type of file loaded supports Exif metadata.
     pub fn supports_exif(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_get_supports_exif(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_get_supports_exif(self.raw) == 1 }
     }
 
     /// Determine whether the type of file loaded supports IPTC metadata.
     pub fn supports_iptc(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_get_supports_iptc(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_get_supports_iptc(self.raw) == 1 }
     }
 
     /// Determine whether the type of file loaded supports XMP metadata.
     pub fn supports_xmp(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_get_supports_xmp(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_get_supports_xmp(self.raw) == 1 }
     }
 
     /// Return the Internet Media Type of the loaded file.
@@ -239,13 +239,13 @@ impl Metadata {
     /// Indicates whether the given tag is present/populated in the loaded metadata.
     pub fn has_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag) }
+        unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag) == 1 }
     }
 
     /// Removes the tag from the metadata if it exists. Returns whether it was there originally.
     pub fn clear_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag) }
+        unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag) == 1 }
     }
 
     /// Remove all tag values from the metadata.
@@ -255,7 +255,7 @@ impl Metadata {
 
     /// Indicates whether the loaded file contains any Exif metadata.
     pub fn has_exif(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_has_exif(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_has_exif(self.raw) == 1 }
     }
 
     /// Removes all Exif metadata.
@@ -287,7 +287,7 @@ impl Metadata {
 
     /// Indicates whether the loaded file contains any XMP metadata.
     pub fn has_xmp(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_has_xmp(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_has_xmp(self.raw) == 1 }
     }
 
     /// Removes all XMP metadata.
@@ -319,7 +319,7 @@ impl Metadata {
 
     /// Indicates whether the loaded file contains any IPTC metadata.
     pub fn has_iptc(&self) -> bool {
-        unsafe { gexiv2::gexiv2_metadata_has_iptc(self.raw) }
+        unsafe { gexiv2::gexiv2_metadata_has_iptc(self.raw) == 1 }
     }
 
     /// Removes all XMP metadata.
@@ -368,9 +368,9 @@ impl Metadata {
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
         let c_str_val = ffi::CString::new(value).unwrap().as_ptr();
-        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
-                                                                       c_str_tag,
-                                                                       c_str_val)) }
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
+                                                                           c_str_tag,
+                                                                           c_str_val)) }
     }
 
     /// Get the value of a tag as a string, potentially formatted for user-visible display.
@@ -379,8 +379,7 @@ impl Metadata {
     pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
         unsafe {
-            let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
-                                                                               c_str_tag);
+            let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag);
             let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
@@ -419,9 +418,8 @@ impl Metadata {
         let c_strs = c_strs.unwrap();
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
-        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
-                                                                         c_str_tag,
-                                                                         ptrs.as_mut_ptr())) }
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag,
+                                                                             ptrs.as_mut_ptr())) }
     }
 
     /// Get the value of a tag as a long.
@@ -437,8 +435,8 @@ impl Metadata {
     /// Only safe if the tag is really of a numeric type.
     pub fn set_tag_long(&self, tag: &str, value: i64) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
-                                                                     c_str_tag, value)) }
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
+                                                                         c_str_tag, value)) }
     }
 
     /// Get the value of an Exif tag as a Rational.
@@ -450,8 +448,8 @@ impl Metadata {
         let ref mut den = 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag,
                                                                      num, den) } {
-            false => None,
-            true => Some(num::rational::Ratio::new(*num, *den))
+            0 => None,
+            _ => Some(num::rational::Ratio::new(*num, *den))
         }
     }
 
@@ -461,10 +459,10 @@ impl Metadata {
     pub fn set_exif_tag_rational(&self,
                                  tag: &str, value: &num::rational::Ratio<i32>) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
-                                                                              c_str_tag,
-                                                                              *value.numer(),
-                                                                              *value.denom())) }
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
+                                                                                  c_str_tag,
+                                                                                  *value.numer(),
+                                                                                  *value.denom())) }
     }
 
 
@@ -487,8 +485,8 @@ impl Metadata {
         let ref mut num = 0;
         let ref mut den = 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exposure_time(self.raw, num, den) } {
-            false => None,
-            true => Some(num::rational::Ratio::new(*num, *den))
+            0 => None,
+            _ => Some(num::rational::Ratio::new(*num, *den))
         }
     }
 
@@ -527,15 +525,17 @@ impl Metadata {
         let ref mut lat = 0.0;
         let ref mut alt = 0.0;
         match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
-            false => None,
-            true => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt })
+            0 => None,
+            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt })
         }
     }
 
     /// Save the specified GPS values to the metadata.
     pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<(), ()> {
-        unsafe { bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw, gps.longitude,
-                                                                     gps.latitude, gps.altitude)) }
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw,
+                                                                         gps.longitude,
+                                                                         gps.latitude,
+                                                                         gps.altitude)) }
     }
 
     /// Remove all saved GPS information from the metadata.
@@ -563,7 +563,7 @@ impl Drop for Metadata {
 /// ```
 pub fn is_exif_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_exif_tag(c_str_tag) }
+    unsafe { gexiv2::gexiv2_metadata_is_exif_tag(c_str_tag) == 1 }
 }
 
 /// Indicates whether the given tag is part of the IPTC domain.
@@ -575,7 +575,7 @@ pub fn is_exif_tag(tag: &str) -> bool {
 /// ```
 pub fn is_iptc_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_iptc_tag(c_str_tag) }
+    unsafe { gexiv2::gexiv2_metadata_is_iptc_tag(c_str_tag) == 1 }
 }
 
 /// Indicates whether the given tag is from the XMP domain.
@@ -587,7 +587,7 @@ pub fn is_iptc_tag(tag: &str) -> bool {
 /// ```
 pub fn is_xmp_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_xmp_tag(c_str_tag) }
+    unsafe { gexiv2::gexiv2_metadata_is_xmp_tag(c_str_tag) == 1 }
 }
 
 /// Get a short label for a tag.
@@ -669,14 +669,14 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
     let c_str_prefix = ffi::CString::new(prefix).unwrap().as_ptr();
-    unsafe { bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name,
-                                                                           c_str_prefix)) }
+    unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name,
+                                                                               c_str_prefix)) }
 }
 
 /// Remove an XMP namespace from the set of known ones.
 pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
-    unsafe { bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name)) }
+    unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name)) }
 }
 
 /// Forget all known XMP namespaces.
@@ -696,10 +696,10 @@ fn free_array_of_pointers(list: *mut *mut libc::c_void) {
     }
 }
 
-/// Convert a success/failure boolean into a Result.
-fn bool_to_result(success: bool) -> Result<(), ()> {
+/// Convert a success/failure integer representing a boolean into a Result.
+fn int_bool_to_result(success: libc::c_int) -> Result<(), ()> {
     return match success {
-        true => Ok(()),
-        false => Err(())
+        0 => Err(()),
+        _ => Ok(())
     }
 }
