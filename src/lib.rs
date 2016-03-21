@@ -1,4 +1,4 @@
-// Copyright © 2015 Felix A. Crux <felixc@felixcrux.com>
+// Copyright © 2015–2016 Felix A. Crux <felixc@felixcrux.com>
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -542,6 +542,7 @@ impl Drop for Metadata {
     }
 }
 
+
 // Tag information.
 
 /// Indicates whether the given tag is from the Exif domain.
@@ -651,9 +652,19 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
     }
 }
 
+
 // XMP namespace management.
 
 /// Add a new XMP namespace for tags to exist under.
+///
+/// It is an error to register a duplicate namespace.
+///
+/// # Examples
+/// ```
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
+/// // But note you can't duplicate a namespace that has already been registered:
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Err(()));
+/// ```
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
     let c_str_prefix = ffi::CString::new(prefix).unwrap().as_ptr();
@@ -662,15 +673,35 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
 }
 
 /// Remove an XMP namespace from the set of known ones.
+///
+/// It is an error to unregister a namespace that isn't registered.
+///
+/// # Examples
+/// ```
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
+/// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"), Ok(()));
+/// // But note you can't unregister a namespace that has already been removed:
+/// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"), Err(()));
+/// ```
 pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
     let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
     unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name)) }
 }
 
 /// Forget all known XMP namespaces.
+///
+/// # Examples
+/// ```
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
+/// rexiv2::unregister_all_xmp_namespaces();
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
+/// ```
 pub fn unregister_all_xmp_namespaces() {
     unsafe { gexiv2::gexiv2_metadata_unregister_all_xmp_namespaces() }
 }
+
+
+// Private internal helpers.
 
 /// Helper function to free an array of pointers, such as those returned by some gexiv2 functions.
 fn free_array_of_pointers(list: *mut *mut libc::c_void) {
