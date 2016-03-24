@@ -1,6 +1,12 @@
 rexiv2
 ======
 
+[![Build Status](https://img.shields.io/travis/felixc/rexiv2.svg)](https://travis-ci.org/felixc/rexiv2)&nbsp;
+[![Crates.io Downloads](https://img.shields.io/crates/d/rexiv2.svg)](https://crates.io/crates/rexiv2)&nbsp;
+[![Crates.io Version](https://img.shields.io/crates/v/rexiv2.svg)](https://crates.io/crates/rexiv2)&nbsp;
+[![License](https://img.shields.io/crates/l/rexiv2.svg)](https://github.com/felixc/rexiv2/blob/master/LICENSE)&nbsp;
+
+
 Rust library for working with media file metadata
 -------------------------------------------------
 
