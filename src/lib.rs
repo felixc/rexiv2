@@ -127,10 +127,10 @@ impl Metadata {
     /// ```
     pub fn new_from_path(path: &str) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path).unwrap().as_ptr();
+        let c_str_path = ffi::CString::new(path).unwrap();
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
-            let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path, &mut err);
+            let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
@@ -173,9 +173,9 @@ impl Metadata {
     /// Save metadata to the file found at the given path, which must already exist.
     pub fn save_to_file(&self, path: &str) -> Result<(), String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path).unwrap().as_ptr();
+        let c_str_path = ffi::CString::new(path).unwrap();
         unsafe {
-            let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path, &mut err);
+            let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
@@ -235,14 +235,14 @@ impl Metadata {
 
     /// Indicates whether the given tag is present/populated in the loaded metadata.
     pub fn has_tag(&self, tag: &str) -> bool {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag) == 1 }
+        let c_str_tag = ffi::CString::new(tag).unwrap();
+        unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag.as_ptr()) == 1 }
     }
 
     /// Removes the tag from the metadata if it exists. Returns whether it was there originally.
     pub fn clear_tag(&self, tag: &str) -> bool {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag) == 1 }
+        let c_str_tag = ffi::CString::new(tag).unwrap();
+        unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag.as_ptr()) == 1 }
     }
 
     /// Remove all tag values from the metadata.
@@ -350,9 +350,9 @@ impl Metadata {
     ///
     /// Only safe if the tag is really of a string type.
     pub fn get_tag_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag);
+            let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
             let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_owned();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
@@ -363,20 +363,21 @@ impl Metadata {
     ///
     /// Only safe if the tag is really of a string type.
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<(), ()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        let c_str_val = ffi::CString::new(value).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_val = ffi::CString::new(value).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
-                                                                           c_str_tag,
-                                                                           c_str_val)) }
+                                                                           c_str_tag.as_ptr(),
+                                                                           c_str_val.as_ptr())) }
     }
 
     /// Get the value of a tag as a string, potentially formatted for user-visible display.
     ///
     /// Only safe if the tag is really of a string type.
     pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag);
+            let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
+                                                                               c_str_tag.as_ptr());
             let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_owned();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
@@ -387,10 +388,10 @@ impl Metadata {
     ///
     /// Only safe if the tag is in fact of a string type.
     pub fn get_tag_multiple_strings(&self, tag: &str) -> Result<Vec<String>, str::Utf8Error> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         let mut vals = vec![];
         unsafe {
-            let c_vals = gexiv2::gexiv2_metadata_get_tag_multiple(self.raw, c_str_tag);
+            let c_vals = gexiv2::gexiv2_metadata_get_tag_multiple(self.raw, c_str_tag.as_ptr());
             let mut cur_offset = 0;
             while !(*c_vals.offset(cur_offset)).is_null() {
                 let value = ffi::CStr::from_ptr(*c_vals.offset(cur_offset)).to_str();
@@ -410,12 +411,13 @@ impl Metadata {
 
     /// Store the given strings as the values of a tag.
     pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) -> Result<(), ()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_strs: Result<Vec<_>, _> = values.iter().map(|&s| ffi::CString::new(s)).collect();
         let c_strs = c_strs.unwrap();
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw, c_str_tag,
+        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
+                                                                             c_str_tag.as_ptr(),
                                                                              ptrs.as_mut_ptr())) }
     }
 
@@ -423,27 +425,28 @@ impl Metadata {
     ///
     /// Only safe if the tag is really of a numeric type.
     pub fn get_tag_long(&self, tag: &str) -> i64 {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag) }
+        let c_str_tag = ffi::CString::new(tag).unwrap();
+        unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) }
     }
 
     /// Set the value of a tag to the given number.
     ///
     /// Only safe if the tag is really of a numeric type.
     pub fn set_tag_long(&self, tag: &str, value: i64) -> Result<(), ()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
-                                                                         c_str_tag, value)) }
+                                                                         c_str_tag.as_ptr(),
+                                                                         value)) }
     }
 
     /// Get the value of an Exif tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
     pub fn get_exif_tag_rational(&self, tag: &str) -> Option<rational::Ratio<i32>> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+        let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
         let den = &mut 0;
-        match unsafe { gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag,
+        match unsafe { gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag.as_ptr(),
                                                                      num, den) } {
             0 => None,
             _ => Some(rational::Ratio::new(*num, *den)),
@@ -454,11 +457,13 @@ impl Metadata {
     ///
     /// Only safe if the tag is in fact of a rational type.
     pub fn set_exif_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), ()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
-                                                                                  c_str_tag,
-                                                                                  *value.numer(),
-                                                                                  *value.denom())) }
+        let c_str_tag = ffi::CString::new(tag).unwrap();
+        unsafe {
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
+                                                                             c_str_tag.as_ptr(),
+                                                                             *value.numer(),
+                                                                             *value.denom()))
+        }
     }
 
 
@@ -553,8 +558,8 @@ impl Drop for Metadata {
 /// assert_eq!(rexiv2::is_exif_tag("Iptc.Application2.Subject"), false);
 /// ```
 pub fn is_exif_tag(tag: &str) -> bool {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_exif_tag(c_str_tag) == 1 }
+    let c_str_tag = ffi::CString::new(tag).unwrap();
+    unsafe { gexiv2::gexiv2_metadata_is_exif_tag(c_str_tag.as_ptr()) == 1 }
 }
 
 /// Indicates whether the given tag is part of the IPTC domain.
@@ -565,8 +570,8 @@ pub fn is_exif_tag(tag: &str) -> bool {
 /// assert_eq!(rexiv2::is_iptc_tag("Xmp.dc.Title"), false);
 /// ```
 pub fn is_iptc_tag(tag: &str) -> bool {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_iptc_tag(c_str_tag) == 1 }
+    let c_str_tag = ffi::CString::new(tag).unwrap();
+    unsafe { gexiv2::gexiv2_metadata_is_iptc_tag(c_str_tag.as_ptr()) == 1 }
 }
 
 /// Indicates whether the given tag is from the XMP domain.
@@ -577,8 +582,8 @@ pub fn is_iptc_tag(tag: &str) -> bool {
 /// assert_eq!(rexiv2::is_xmp_tag("Exif.Photo.FocalLength"), false);
 /// ```
 pub fn is_xmp_tag(tag: &str) -> bool {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
-    unsafe { gexiv2::gexiv2_metadata_is_xmp_tag(c_str_tag) == 1 }
+    let c_str_tag = ffi::CString::new(tag).unwrap();
+    unsafe { gexiv2::gexiv2_metadata_is_xmp_tag(c_str_tag.as_ptr()) == 1 }
 }
 
 /// Get a short label for a tag.
@@ -588,9 +593,9 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 /// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_owned()));
 /// ```
 pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+    let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
-        let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag);
+        let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
         Ok(try!(ffi::CStr::from_ptr(c_str_label).to_str()).to_owned())
     }
 }
@@ -603,9 +608,9 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 ///     Ok("The Subject Reference is a structured definition of the subject matter.".to_owned()))
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+    let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
-        let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag);
+        let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
         Ok(try!(ffi::CStr::from_ptr(c_str_desc).to_str()).to_owned())
     }
 }
@@ -618,9 +623,9 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
 /// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok(rexiv2::TagType::Date));
 /// ```
 pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
-    let c_str_tag = ffi::CString::new(tag).unwrap().as_ptr();
+    let c_str_tag = ffi::CString::new(tag).unwrap();
     let tag_type = unsafe {
-        let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag);
+        let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
         try!(ffi::CStr::from_ptr(c_str_type).to_str())
     };
     match tag_type {
@@ -666,10 +671,12 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
 /// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Err(()));
 /// ```
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
-    let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
-    let c_str_prefix = ffi::CString::new(prefix).unwrap().as_ptr();
-    unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name,
-                                                                               c_str_prefix)) }
+    let c_str_name = ffi::CString::new(name).unwrap();
+    let c_str_prefix = ffi::CString::new(prefix).unwrap();
+    unsafe {
+        int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name.as_ptr(),
+                                                                          c_str_prefix.as_ptr()))
+    }
 }
 
 /// Remove an XMP namespace from the set of known ones.
@@ -684,8 +691,10 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
 /// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"), Err(()));
 /// ```
 pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
-    let c_str_name = ffi::CString::new(name).unwrap().as_ptr();
-    unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name)) }
+    let c_str_name = ffi::CString::new(name).unwrap();
+    unsafe {
+        int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name.as_ptr()))
+    }
 }
 
 /// Forget all known XMP namespaces.
