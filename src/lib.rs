@@ -52,7 +52,7 @@ pub struct Metadata {
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
@@ -60,7 +60,7 @@ pub struct GpsInfo {
 }
 
 /// The possible data types that a tag can have.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum TagType {
     /// Exif BYTE type, 8-bit unsigned integer.
     UnsignedByte,
@@ -112,6 +112,10 @@ pub enum TagType {
     Invalid,
     /// Unknown type.
     Unknown,
+}
+
+impl Default for TagType {
+    fn default() -> TagType { TagType::Unknown }
 }
 
 pub use gexiv2::Orientation;
