@@ -21,6 +21,7 @@ include = [
   "README.md",
   "CHANGELOG",
   "LICENSE",
+  "SETUP.md",
   "src/**/*",
 ]
 

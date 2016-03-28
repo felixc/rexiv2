@@ -27,7 +27,7 @@
 //! let file = "myimage.jpg";
 //! let tag = "Iptc.Application2.Keywords";
 //! let meta = rexiv2::Metadata::new_from_path(&file).unwrap();
-//! println!("{:?}", meta.get_tag_multiple_strings(tag))
+//! println!("{:?}", meta.get_tag_multiple_strings(tag));
 //! ```
 //!
 //! [gexiv2]:      https://wiki.gnome.org/Projects/gexiv2
@@ -609,7 +609,7 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 /// # Examples
 /// ```
 /// assert_eq!(rexiv2::get_tag_description("Iptc.Application2.Subject"),
-///     Ok("The Subject Reference is a structured definition of the subject matter.".to_owned()))
+///     Ok("The Subject Reference is a structured definition of the subject matter.".to_owned()));
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
