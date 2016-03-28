@@ -39,22 +39,14 @@ come in handy.
 [exiv2-cli]:  http://exiv2.org/manpage.html
 
 
-Dependencies
-------------
+Setup & Dependencies
+--------------------
 
-Being a wrapper for Exiv2, and gexiv2, rexiv2 obviously depends on them. Only
-the library (e.g. `.so` or `.dll`) files are needed; not the headers or source
-code. You can download these dependencies from their download pages:
-[Exiv2][exiv2-dl]; [gexiv2][gexiv2-dl].
+Being a wrapper for gexiv2 and Exiv2, rexiv2 obviously depends on them. These
+libraries are not bundled with rexiv2: you will need to install them separately.
 
-On a Linux system, you can typically install these dependencies through your
-package manager (look for packages with names like “libgexiv2-dev”). Mac OS X
-users may also have this option through unofficial package management systems.
-Note that to build rexiv2 from source you may need not just the library
-packages, but the “dev” versions of them as well.
-
-[exiv2-dl]:  http://www.exiv2.org/download.html
-[gexiv2-dl]: https://wiki.gnome.org/Projects/gexiv2/BuildingAndInstalling
+For full instructions on how to get started with rexiv2, including how to
+install the prerequisite dependencies, refer to the [`SETUP`](SETUP.md) file.
 
 
 Versioning & History
