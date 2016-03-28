@@ -66,22 +66,22 @@ See the [`CHANGELOG`](CHANGELOG) file for a history of released versions.
 [semver]: http://semver.org/spec/v2.0.0.html
 
 
-Contributing
-------------
+Contributions & Bug Reports
+---------------------------
 
 Contributions are gladly accepted, either through GitHub pull requests or by
 mailing patches to `felixc@felixcrux.com` (PGP key [8569B6311EE485F8][pgp-key]).
 
-It is strongly recommended that you indicate your intent to contribute by
-opening an issue on the tracker (or commenting on an existing one) describing
-the bug you are fixing or the improvement you intend to make. This helps prevent
-duplication of efforts and allows for discussion of e.g. API specifics before
-too much time is spent on implementation.
+**By contributing, you are agreeing to make your contribution available under
+the same license terms as the rest of the project.**
 
-By contributing, you are agreeing to make your contribution available under the
-same license terms as the rest of the project.
+Bug reports and feature requests can also be sent through GitHub Issues or by
+email, and are very welcome and appreciated.
+
+For more information, see the [`CONTRIBUTING`](CONTRIBUTING.md) file.
 
 [pgp-key]: http://hkps.pool.sks-keyservers.net/pks/lookup?op=vindex&search=0x8569B6311EE485F8
+
 
 Copyright & License
 -------------------
