@@ -1,3 +1,8 @@
+2016-03-30 - v0.3.3
+  * Dependency cleanup: removed rustc-serialize & bumped gexiv2-sys.
+  * Types implement more common useful traits.
+  * Documentation improvements, including bundling setup instructions.
+
 2015-09-11 - v0.3.2
   * Dependency version bump (gexiv2-sys to 0.5 and libc to 0.2).
 
