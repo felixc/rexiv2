@@ -1,10 +1,18 @@
 rexiv2
 ======
 
-[![Build Status](https://img.shields.io/travis/felixc/rexiv2.svg)](https://travis-ci.org/felixc/rexiv2)&nbsp;
-[![Crates.io Downloads](https://img.shields.io/crates/d/rexiv2.svg)](https://crates.io/crates/rexiv2)&nbsp;
-[![Crates.io Version](https://img.shields.io/crates/v/rexiv2.svg)](https://crates.io/crates/rexiv2)&nbsp;
-[![License](https://img.shields.io/crates/l/rexiv2.svg)](https://github.com/felixc/rexiv2/blob/master/LICENSE)&nbsp;
+[![build-badge][]][build] &nbsp;
+[![downloads-badge][]][crates-io] &nbsp;
+[![version-badge][]][crates-io] &nbsp;
+[![license-badge][]][license] &nbsp;
+
+[build]: https://travis-ci.org/felixc/rexiv2
+[build-badge]: https://img.shields.io/travis/felixc/rexiv2.svg
+[crates-io]: https://crates.io/crates/rexiv2
+[downloads-badge]: https://img.shields.io/crates/d/rexiv2.svg
+[version-badge]: https://img.shields.io/crates/v/rexiv2.svg
+[license]: https://github.com/felixc/rexiv2/blob/master/LICENSE
+[license-badge]: https://img.shields.io/crates/l/rexiv2.svg
 
 
 Rust library for working with media file metadata
