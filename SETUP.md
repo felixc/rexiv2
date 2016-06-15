@@ -4,9 +4,13 @@ Setup & Dependencies
 Dependencies
 ------------
 
+rexiv2 requires Rust 1.4 or newer.
+
 Given that it links to gexiv2, and transitively to Exiv2, rexiv2 obviously
 depends on them (and on their dependencies). Having these libraries installed on
 your system is a prerequisite to using rexiv2, or any software built on it.
+
+gexiv2 is supported from version 0.10 onwards, and Exiv2 from version 0.23.
 
 Platform-specific instructions for how to accomplish this are below:
 
