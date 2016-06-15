@@ -127,7 +127,7 @@ impl Metadata {
     /// ```no_run
     /// let path = "myphoto.jpg";
     /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), "image/jpeg".to_owned());
+    /// assert_eq!(meta.get_media_type().unwrap(), "image/jpeg".to_string());
     /// ```
     pub fn new_from_path(path: &str) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -138,8 +138,8 @@ impl Metadata {
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
-                    Ok(v) => Err(v.to_owned()),
-                    Err(_) => Err("Unknown error".to_owned()),
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
                 };
             }
             Ok(Metadata { raw: metadata })
@@ -155,7 +155,7 @@ impl Metadata {
     ///                8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73, 69,
     ///                78, 68, 174, 66, 96, 130];
     /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), "image/png".to_owned());
+    /// assert_eq!(meta.get_media_type().unwrap(), "image/png".to_string());
     /// ```
     pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -166,8 +166,8 @@ impl Metadata {
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
-                    Ok(v) => Err(v.to_owned()),
-                    Err(_) => Err("Unknown error".to_owned()),
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
                 };
             }
             Ok(Metadata { raw: metadata })
@@ -183,8 +183,8 @@ impl Metadata {
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
-                    Ok(v) => Err(v.to_owned()),
-                    Err(_) => Err("Unknown error".to_owned()),
+                    Ok(v) => Err(v.to_string()),
+                    Err(_) => Err("Unknown error".to_string()),
                 };
             }
             Ok(())
@@ -214,7 +214,7 @@ impl Metadata {
         // TODO: Return an enum?
         unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
-            Ok(try!(ffi::CStr::from_ptr(c_str_mime).to_str()).to_owned())
+            Ok(try!(ffi::CStr::from_ptr(c_str_mime).to_str()).to_string())
         }
     }
 
@@ -273,7 +273,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => tags.push(v.to_owned()),
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -305,7 +305,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => tags.push(v.to_owned()),
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -337,7 +337,7 @@ impl Metadata {
             while !(*c_tags.offset(cur_offset)).is_null() {
                 let tag = ffi::CStr::from_ptr(*c_tags.offset(cur_offset)).to_str();
                 match tag {
-                    Ok(v) => tags.push(v.to_owned()),
+                    Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
                         return Err(e);
@@ -357,7 +357,7 @@ impl Metadata {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
-            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_owned();
+            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
         }
@@ -382,7 +382,7 @@ impl Metadata {
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
                                                                                c_str_tag.as_ptr());
-            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_owned();
+            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
         }
@@ -400,7 +400,7 @@ impl Metadata {
             while !(*c_vals.offset(cur_offset)).is_null() {
                 let value = ffi::CStr::from_ptr(*c_vals.offset(cur_offset)).to_str();
                 match value {
-                    Ok(v) => vals.push(v.to_owned()),
+                    Ok(v) => vals.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_vals as *mut *mut libc::c_void);
                         return Err(e);
@@ -594,13 +594,13 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_owned()));
+/// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_string()));
 /// ```
 pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
         let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
-        Ok(try!(ffi::CStr::from_ptr(c_str_label).to_str()).to_owned())
+        Ok(try!(ffi::CStr::from_ptr(c_str_label).to_str()).to_string())
     }
 }
 
@@ -609,13 +609,13 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 /// # Examples
 /// ```
 /// assert_eq!(rexiv2::get_tag_description("Iptc.Application2.Subject"),
-///     Ok("The Subject Reference is a structured definition of the subject matter.".to_owned()));
+///     Ok("The Subject Reference is a structured definition of the subject matter.".to_string()));
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
         let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
-        Ok(try!(ffi::CStr::from_ptr(c_str_desc).to_str()).to_owned())
+        Ok(try!(ffi::CStr::from_ptr(c_str_desc).to_str()).to_string())
     }
 }
 
