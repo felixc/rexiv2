@@ -46,6 +46,8 @@ use std::ffi;
 use std::ptr;
 use std::str;
 
+use std::os::unix::ffi::OsStrExt;
+
 /// An opaque structure that serves as a container for a media file's metadata.
 pub struct Metadata {
     raw: *mut gexiv2::GExiv2Metadata,
@@ -129,9 +131,9 @@ impl Metadata {
     /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
     /// assert_eq!(meta.get_media_type().unwrap(), "image/jpeg".to_string());
     /// ```
-    pub fn new_from_path(path: &str) -> Result<Metadata, String> {
+    pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path).unwrap();
+        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
@@ -175,9 +177,9 @@ impl Metadata {
     }
 
     /// Save metadata to the file found at the given path, which must already exist.
-    pub fn save_to_file(&self, path: &str) -> Result<(), String> {
+    pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<(), String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path).unwrap();
+        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {

@@ -15,10 +15,19 @@
 
 extern crate rexiv2;
 
+use std::path::Path;
+
+
+#[test]
+fn new_from_str_path() {
+    let sample_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png");
+    let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
+    assert_eq!(meta.get_media_type().unwrap(), "image/png");
+}
 
 #[test]
 fn new_from_path() {
-    let sample_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png");
+    let sample_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png"));
     let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
     assert_eq!(meta.get_media_type().unwrap(), "image/png");
 }
