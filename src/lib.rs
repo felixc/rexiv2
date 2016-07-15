@@ -256,7 +256,7 @@ impl Metadata {
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_buf(
-                metadata, data.as_ptr(), data.len() as i64, &mut err);
+                metadata, data.as_ptr(), data.len() as libc::c_long, &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return match err_msg {
@@ -521,19 +521,19 @@ impl Metadata {
     /// Get the value of a tag as a number.
     ///
     /// Only safe if the tag is really of a numeric type.
-    pub fn get_tag_numeric(&self, tag: &str) -> i64 {
+    pub fn get_tag_numeric(&self, tag: &str) -> i32 {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) }
+        unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) as i32 }
     }
 
     /// Set the value of a tag to the given number.
     ///
     /// Only safe if the tag is really of a numeric type.
-    pub fn set_tag_numeric(&self, tag: &str, value: i64) -> Result<(), ()> {
+    pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
                                                                          c_str_tag.as_ptr(),
-                                                                         value)) }
+                                                                         value as libc::c_long)) }
     }
 
     /// Get the value of a tag as a Rational.
