@@ -536,10 +536,10 @@ impl Metadata {
                                                                          value)) }
     }
 
-    /// Get the value of an Exif tag as a Rational.
+    /// Get the value of a tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn get_exif_tag_rational(&self, tag: &str) -> Option<rational::Ratio<i32>> {
+    pub fn get_tag_rational(&self, tag: &str) -> Option<rational::Ratio<i32>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
         let den = &mut 0;
@@ -550,10 +550,10 @@ impl Metadata {
         }
     }
 
-    /// Set the value of an Exif tag to a Rational.
+    /// Set the value of a tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn set_exif_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), ()> {
+    pub fn set_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,

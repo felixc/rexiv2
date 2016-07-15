@@ -4,6 +4,7 @@ Unreleased
   * Breaking change: Image media types are now represented by an enum instead of
     magic strings. It is easy to convert between the two forms using ::from().
   * Breaking change: get/set_tag_long() are renamed get/set_tag_numeric().
+  * Breaking change: get/set_exif_tag_rational() renamed get/set_tag_rational().
 
 2016-03-30 - v0.3.3
   * Dependency cleanup: removed rustc-serialize & bumped gexiv2-sys.
