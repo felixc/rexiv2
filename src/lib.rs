@@ -518,10 +518,10 @@ impl Metadata {
                                                                              ptrs.as_mut_ptr())) }
     }
 
-    /// Get the value of a tag as a long.
+    /// Get the value of a tag as a number.
     ///
     /// Only safe if the tag is really of a numeric type.
-    pub fn get_tag_long(&self, tag: &str) -> i64 {
+    pub fn get_tag_numeric(&self, tag: &str) -> i64 {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) }
     }
@@ -529,7 +529,7 @@ impl Metadata {
     /// Set the value of a tag to the given number.
     ///
     /// Only safe if the tag is really of a numeric type.
-    pub fn set_tag_long(&self, tag: &str, value: i64) -> Result<(), ()> {
+    pub fn set_tag_numeric(&self, tag: &str, value: i64) -> Result<(), ()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
                                                                          c_str_tag.as_ptr(),
