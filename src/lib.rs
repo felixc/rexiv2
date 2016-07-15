@@ -120,6 +120,98 @@ impl Default for TagType {
     fn default() -> TagType { TagType::Unknown }
 }
 
+/// The media types that an image might have.
+///
+/// This can be easily converted to/created from an Internet Media Type string with the `::from()`
+/// method, thanks to the `std::convert::From` trait.
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+pub enum MediaType {
+    /// image/x-ms-bmp
+    Bmp,
+    /// image/x-canon-cr2
+    CanonCr2,
+    /// image/x-canon-crw
+    CanonCrw,
+    /// application/postscript
+    Eps,
+    /// image/x-fuji-raf
+    FujiRaf,
+    /// image/gif
+    Gif,
+    /// image/jp2
+    Jp2,
+    /// image/jpeg
+    Jpeg,
+    /// image/x-minolta-mrw
+    MinoltaMrw,
+    /// image/x-olympus-orf
+    OlympusOrf,
+    /// image/png
+    Png,
+    /// image/x-photoshop
+    Psd,
+    /// image/x-panasonic-rw2
+    PanasonicRw2,
+    /// image/targa
+    Tga,
+    /// image/tiff
+    Tiff,
+    /// Some other, unrecognized, media type, contained within.
+    Other(String)
+}
+
+impl<'a> std::convert::From<&'a MediaType> for String {
+    fn from(t: &MediaType) -> String {
+        match t {
+            &MediaType::Bmp => "image/x-ms-bmp".to_string(),
+            &MediaType::CanonCr2 => "image/x-canon-cr2".to_string(),
+            &MediaType::CanonCrw => "image/x-canon-crw".to_string(),
+            &MediaType::Eps => "application/postscript".to_string(),
+            &MediaType::FujiRaf => "image/x-fuji-raf".to_string(),
+            &MediaType::Gif => "image/gif".to_string(),
+            &MediaType::Jp2 => "image/jp2".to_string(),
+            &MediaType::Jpeg => "image/jpeg".to_string(),
+            &MediaType::MinoltaMrw => "image/x-minolta-mrw".to_string(),
+            &MediaType::OlympusOrf => "image/x-olympus-orf".to_string(),
+            &MediaType::Png => "image/png".to_string(),
+            &MediaType::Psd => "image/x-photoshop".to_string(),
+            &MediaType::PanasonicRw2 => "image/x-panasonic-rw2".to_string(),
+            &MediaType::Tga => "image/targa".to_string(),
+            &MediaType::Tiff => "image/tiff".to_string(),
+            &MediaType::Other(ref s) => s.clone()
+        }
+    }
+}
+
+impl<'a> std::convert::From<&'a str> for MediaType {
+    fn from(t: &str) -> MediaType {
+        match t {
+            "image/x-ms-bmp" => MediaType::Bmp,
+            "image/x-canon-cr2" => MediaType::CanonCr2,
+            "image/x-canon-crw" => MediaType::CanonCrw,
+            "application/postscript" => MediaType::Eps,
+            "image/x-fuji-raf" => MediaType::FujiRaf,
+            "image/gif" => MediaType::Gif,
+            "image/jp2" => MediaType::Jp2,
+            "image/jpeg" => MediaType::Jpeg,
+            "image/x-minolta-mrw" => MediaType::MinoltaMrw,
+            "image/x-olympus-orf" => MediaType::OlympusOrf,
+            "image/png" => MediaType::Png,
+            "image/x-photoshop" => MediaType::Psd,
+            "image/x-panasonic-rw2" => MediaType::PanasonicRw2,
+            "image/targa" => MediaType::Tga,
+            "image/tiff" => MediaType::Tiff,
+            _ => MediaType::Other(t.to_string())
+        }
+    }
+}
+
+impl std::fmt::Display for MediaType {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", String::from(self))
+    }
+}
+
 pub use gexiv2::Orientation;
 
 impl Metadata {
@@ -129,7 +221,7 @@ impl Metadata {
     /// ```no_run
     /// let path = "myphoto.jpg";
     /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), "image/jpeg".to_string());
+    /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Jpeg);
     /// ```
     pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -157,7 +249,7 @@ impl Metadata {
     ///                8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73, 69,
     ///                78, 68, 174, 66, 96, 130];
     /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), "image/png".to_string());
+    /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
     /// ```
     pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, String> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -211,12 +303,11 @@ impl Metadata {
         unsafe { gexiv2::gexiv2_metadata_get_supports_xmp(self.raw) == 1 }
     }
 
-    /// Return the Internet Media Type of the loaded file.
-    pub fn get_media_type(&self) -> Result<String, str::Utf8Error> {
-        // TODO: Return an enum?
+    /// Return the media type of the loaded file.
+    pub fn get_media_type(&self) -> Result<MediaType, str::Utf8Error> {
         unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
-            Ok(try!(ffi::CStr::from_ptr(c_str_mime).to_str()).to_string())
+            Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_mime).to_str())))
         }
     }
 

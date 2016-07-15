@@ -22,14 +22,14 @@ use std::path::Path;
 fn new_from_str_path() {
     let sample_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png");
     let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
-    assert_eq!(meta.get_media_type().unwrap(), "image/png");
+    assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
 }
 
 #[test]
 fn new_from_path() {
     let sample_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png"));
     let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
-    assert_eq!(meta.get_media_type().unwrap(), "image/png");
+    assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
 }
 
 #[test]

@@ -1,6 +1,8 @@
 Unreleased
   * Path operations now accept anything that implements AsRef<ffi::OsStr>,
     which enables support for path::Paths in addition to strs.
+  * Breaking change: Image media types are now represented by an enum instead of
+    magic strings. It is easy to convert between the two forms using ::from().
 
 2016-03-30 - v0.3.3
   * Dependency cleanup: removed rustc-serialize & bumped gexiv2-sys.
