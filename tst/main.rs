@@ -33,6 +33,21 @@ fn new_from_path() {
 }
 
 #[test]
+fn new_from_buffer() {
+    let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
+    assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
+}
+
+#[test]
+fn new_from_buffer_error() {
+    let mut bytes = include_bytes!("sample.png").to_vec();
+    bytes.swap(0, 1);
+    let meta_result = rexiv2::Metadata::new_from_buffer(&bytes);
+    assert_eq!(meta_result,
+               Err(rexiv2::Rexiv2Error::Internal(Some("unsupported format".to_string()))));
+}
+
+#[test]
 fn supports_exif() {
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.supports_exif(), true);

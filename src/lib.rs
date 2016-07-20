@@ -48,7 +48,52 @@ use std::str;
 
 use std::os::unix::ffi::OsStrExt;
 
+/// A wrapper type for the kinds of errors one might encounter when using the library.
+#[derive(Debug, PartialEq)]
+pub enum Rexiv2Error {
+    /// See std::str::Utf8Error
+    Utf8(str::Utf8Error),
+    /// An error generated from the wrapped gexiv2 or Exiv2 libraries.
+    ///
+    /// May or may not contain a description message.
+    Internal(Option<String>),
+}
+
+impl std::fmt::Display for Rexiv2Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        match *self {
+            Rexiv2Error::Utf8(ref err) => write!(f, "IO error: {}", err),
+            Rexiv2Error::Internal(Some(ref msg)) => write!(f, "Internal error: {}", msg),
+            Rexiv2Error::Internal(None) => write!(f, "Unknown internal error"),
+        }
+    }
+}
+
+impl std::error::Error for Rexiv2Error {
+    fn description(&self) -> &str {
+        match *self {
+            Rexiv2Error::Utf8(ref err) => err.description(),
+            Rexiv2Error::Internal(Some(ref msg)) => msg,
+            Rexiv2Error::Internal(None) => "Unknown internal error",
+        }
+    }
+
+    fn cause(&self) -> Option<&std::error::Error> {
+        match *self {
+            Rexiv2Error::Utf8(ref err) => Some(err),
+            Rexiv2Error::Internal(_) => None
+        }
+    }
+}
+
+impl From<str::Utf8Error> for Rexiv2Error {
+    fn from(err: str::Utf8Error) -> Rexiv2Error {
+        Rexiv2Error::Utf8(err)
+    }
+}
+
 /// An opaque structure that serves as a container for a media file's metadata.
+#[derive(Debug, PartialEq)]
 pub struct Metadata {
     raw: *mut gexiv2::GExiv2Metadata,
 }
@@ -223,7 +268,7 @@ impl Metadata {
     /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
     /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Jpeg);
     /// ```
-    pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata, String> {
+    pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata, Rexiv2Error> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
@@ -231,10 +276,7 @@ impl Metadata {
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return match err_msg {
-                    Ok(v) => Err(v.to_string()),
-                    Err(_) => Err("Unknown error".to_string()),
-                };
+                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
             }
             Ok(Metadata { raw: metadata })
         }
@@ -251,7 +293,7 @@ impl Metadata {
     /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
     /// ```
-    pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, String> {
+    pub fn new_from_buffer(data: &[u8]) -> Result<Metadata, Rexiv2Error> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
@@ -259,27 +301,21 @@ impl Metadata {
                 metadata, data.as_ptr(), data.len() as libc::c_long, &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return match err_msg {
-                    Ok(v) => Err(v.to_string()),
-                    Err(_) => Err("Unknown error".to_string()),
-                };
+                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
             }
             Ok(Metadata { raw: metadata })
         }
     }
 
     /// Save metadata to the file found at the given path, which must already exist.
-    pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<(), String> {
+    pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<(), Rexiv2Error> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return match err_msg {
-                    Ok(v) => Err(v.to_string()),
-                    Err(_) => Err("Unknown error".to_string()),
-                };
+                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
             }
             Ok(())
         }
@@ -304,7 +340,7 @@ impl Metadata {
     }
 
     /// Return the media type of the loaded file.
-    pub fn get_media_type(&self) -> Result<MediaType, str::Utf8Error> {
+    pub fn get_media_type(&self) -> Result<MediaType, Rexiv2Error> {
         unsafe {
             let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
             Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_mime).to_str())))
@@ -358,7 +394,7 @@ impl Metadata {
     }
 
     /// List all Exif tags present in the loaded metadata.
-    pub fn get_exif_tags(&self) -> Result<Vec<String>, str::Utf8Error> {
+    pub fn get_exif_tags(&self) -> Result<Vec<String>, Rexiv2Error> {
         let mut tags = vec![];
         unsafe {
             let c_tags = gexiv2::gexiv2_metadata_get_exif_tags(self.raw);
@@ -369,7 +405,7 @@ impl Metadata {
                     Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
-                        return Err(e);
+                        return Err(Rexiv2Error::from(e));
                     }
                 }
                 cur_offset += 1;
@@ -390,7 +426,7 @@ impl Metadata {
     }
 
     /// List all XMP tags present in the loaded metadata.
-    pub fn get_xmp_tags(&self) -> Result<Vec<String>, str::Utf8Error> {
+    pub fn get_xmp_tags(&self) -> Result<Vec<String>, Rexiv2Error> {
         let mut tags = vec![];
         unsafe {
             let c_tags = gexiv2::gexiv2_metadata_get_xmp_tags(self.raw);
@@ -401,7 +437,7 @@ impl Metadata {
                     Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
-                        return Err(e);
+                        return Err(Rexiv2Error::from(e));
                     }
                 }
                 cur_offset += 1;
@@ -422,7 +458,7 @@ impl Metadata {
     }
 
     /// List all IPTC tags present in the loaded metadata.
-    pub fn get_iptc_tags(&self) -> Result<Vec<String>, str::Utf8Error> {
+    pub fn get_iptc_tags(&self) -> Result<Vec<String>, Rexiv2Error> {
         let mut tags = vec![];
         unsafe {
             let c_tags = gexiv2::gexiv2_metadata_get_iptc_tags(self.raw);
@@ -433,7 +469,7 @@ impl Metadata {
                     Ok(v) => tags.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_tags as *mut *mut libc::c_void);
-                        return Err(e);
+                        return Err(Rexiv2Error::from(e));
                     }
                 }
                 cur_offset += 1;
@@ -446,7 +482,7 @@ impl Metadata {
     /// Get the value of a tag as a string.
     ///
     /// Only safe if the tag is really of a string type.
-    pub fn get_tag_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
+    pub fn get_tag_string(&self, tag: &str) -> Result<String, Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
@@ -459,7 +495,7 @@ impl Metadata {
     /// Set the value of a tag to the given string.
     ///
     /// Only safe if the tag is really of a string type.
-    pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<(), ()> {
+    pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<(), Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
@@ -470,7 +506,7 @@ impl Metadata {
     /// Get the value of a tag as a string, potentially formatted for user-visible display.
     ///
     /// Only safe if the tag is really of a string type.
-    pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String, str::Utf8Error> {
+    pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String, Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
@@ -484,7 +520,7 @@ impl Metadata {
     /// Retrieve the list of string values of the given tag.
     ///
     /// Only safe if the tag is in fact of a string type.
-    pub fn get_tag_multiple_strings(&self, tag: &str) -> Result<Vec<String>, str::Utf8Error> {
+    pub fn get_tag_multiple_strings(&self, tag: &str) -> Result<Vec<String>, Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let mut vals = vec![];
         unsafe {
@@ -496,7 +532,7 @@ impl Metadata {
                     Ok(v) => vals.push(v.to_string()),
                     Err(e) => {
                         free_array_of_pointers(c_vals as *mut *mut libc::c_void);
-                        return Err(e);
+                        return Err(Rexiv2Error::from(e));
                     }
                 }
                 cur_offset += 1;
@@ -507,7 +543,7 @@ impl Metadata {
     }
 
     /// Store the given strings as the values of a tag.
-    pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) -> Result<(), ()> {
+    pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) -> Result<(), Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_strs: Result<Vec<_>, _> = values.iter().map(|&s| ffi::CString::new(s)).collect();
         let c_strs = c_strs.unwrap();
@@ -529,7 +565,7 @@ impl Metadata {
     /// Set the value of a tag to the given number.
     ///
     /// Only safe if the tag is really of a numeric type.
-    pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<(), ()> {
+    pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<(), Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
                                                                          c_str_tag.as_ptr(),
@@ -553,7 +589,7 @@ impl Metadata {
     /// Set the value of a tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn set_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), ()> {
+    pub fn set_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<(), Rexiv2Error> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
@@ -625,7 +661,7 @@ impl Metadata {
     }
 
     /// Save the specified GPS values to the metadata.
-    pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<(), ()> {
+    pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<(), Rexiv2Error> {
         unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw,
                                                                          gps.longitude,
                                                                          gps.latitude,
@@ -689,7 +725,7 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 /// ```
 /// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_string()));
 /// ```
-pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
+pub fn get_tag_label(tag: &str) -> Result<String, Rexiv2Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
         let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
@@ -704,7 +740,7 @@ pub fn get_tag_label(tag: &str) -> Result<String, str::Utf8Error> {
 /// assert_eq!(rexiv2::get_tag_description("Iptc.Application2.Subject"),
 ///     Ok("The Subject Reference is a structured definition of the subject matter.".to_string()));
 /// ```
-pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
+pub fn get_tag_description(tag: &str) -> Result<String, Rexiv2Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
         let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
@@ -719,7 +755,7 @@ pub fn get_tag_description(tag: &str) -> Result<String, str::Utf8Error> {
 /// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.Subject"), Ok(rexiv2::TagType::String));
 /// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok(rexiv2::TagType::Date));
 /// ```
-pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
+pub fn get_tag_type(tag: &str) -> Result<TagType, Rexiv2Error> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     let tag_type = unsafe {
         let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
@@ -765,9 +801,10 @@ pub fn get_tag_type(tag: &str) -> Result<TagType, str::Utf8Error> {
 /// ```
 /// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
 /// // But note you can't duplicate a namespace that has already been registered:
-/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Err(()));
+/// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"),
+///    Err(rexiv2::Rexiv2Error::Internal(None)));
 /// ```
-pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
+pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), Rexiv2Error> {
     let c_str_name = ffi::CString::new(name).unwrap();
     let c_str_prefix = ffi::CString::new(prefix).unwrap();
     unsafe {
@@ -785,9 +822,10 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<(), ()> {
 /// assert_eq!(rexiv2::register_xmp_namespace("http://creativecommons.org/ns#/", "cc"), Ok(()));
 /// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"), Ok(()));
 /// // But note you can't unregister a namespace that has already been removed:
-/// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"), Err(()));
+/// assert_eq!(rexiv2::unregister_xmp_namespace("http://creativecommons.org/ns#/"),
+///    Err(rexiv2::Rexiv2Error::Internal(None)));
 /// ```
-pub fn unregister_xmp_namespace(name: &str) -> Result<(), ()> {
+pub fn unregister_xmp_namespace(name: &str) -> Result<(), Rexiv2Error> {
     let c_str_name = ffi::CString::new(name).unwrap();
     unsafe {
         int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name.as_ptr()))
@@ -822,9 +860,9 @@ fn free_array_of_pointers(list: *mut *mut libc::c_void) {
 }
 
 /// Convert a success/failure integer representing a boolean into a Result.
-fn int_bool_to_result(success: libc::c_int) -> Result<(), ()> {
+fn int_bool_to_result(success: libc::c_int) -> Result<(), Rexiv2Error> {
     match success {
-        0 => Err(()),
+        0 => Err(Rexiv2Error::Internal(None)),
         _ => Ok(()),
     }
 }
