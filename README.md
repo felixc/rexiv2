@@ -64,14 +64,14 @@ install the prerequisite dependencies, refer to the [`SETUP`](SETUP.md) file.
 Versioning & History
 --------------------
 
-rexiv2 is currently only available in an unstable development version.
+rexiv2 is currently available as a pre-1.0 development version.
 
-Version numbers follow the principles of [Semantic Versioning][semver]. In
-particular, this means that once development reaches the 1.0.0 version, the
-API will be considered stable, and any changes will be made gradually and
-gracefully across multiple versions, with reasonable deprecation timelines.
-But, until then, don’t rely on the API working the same way from minor version
-to minor version.
+Version numbers follow the principles of [Semantic Versioning][semver].
+
+No further breaking API changes are planned, but they are possible as a result
+of feedback on the API as more users try it out. Such feedback is welcome, and
+having the API tried out in real applications is part of ensuring it’s ready for
+a 1.0 release.
 
 See the [`CHANGELOG`](CHANGELOG) file for a history of released versions.
 
