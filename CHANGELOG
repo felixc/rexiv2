@@ -1,3 +1,6 @@
+2016-10-04 - v0.4.1
+  * Fix for potential crash due to dereferencing null pointer.
+
 2016-07-21 - v0.4.0
   * Path operations now accept anything that implements AsRef<ffi::OsStr>,
     which enables support for path::Paths in addition to strs.
