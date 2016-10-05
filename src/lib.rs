@@ -51,6 +51,8 @@ use std::os::unix::ffi::OsStrExt;
 /// A wrapper type for the kinds of errors one might encounter when using the library.
 #[derive(Debug, PartialEq)]
 pub enum Rexiv2Error {
+    /// No value found
+    NoValue,
     /// See std::str::Utf8Error
     Utf8(str::Utf8Error),
     /// An error generated from the wrapped gexiv2 or Exiv2 libraries.
@@ -62,6 +64,7 @@ pub enum Rexiv2Error {
 impl std::fmt::Display for Rexiv2Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
+            Rexiv2Error::NoValue => write!(f, "No value found"),
             Rexiv2Error::Utf8(ref err) => write!(f, "IO error: {}", err),
             Rexiv2Error::Internal(Some(ref msg)) => write!(f, "Internal error: {}", msg),
             Rexiv2Error::Internal(None) => write!(f, "Unknown internal error"),
@@ -72,6 +75,7 @@ impl std::fmt::Display for Rexiv2Error {
 impl std::error::Error for Rexiv2Error {
     fn description(&self) -> &str {
         match *self {
+            Rexiv2Error::NoValue => "No value found",
             Rexiv2Error::Utf8(ref err) => err.description(),
             Rexiv2Error::Internal(Some(ref msg)) => msg,
             Rexiv2Error::Internal(None) => "Unknown internal error",
@@ -80,6 +84,7 @@ impl std::error::Error for Rexiv2Error {
 
     fn cause(&self) -> Option<&std::error::Error> {
         match *self {
+            Rexiv2Error::NoValue => None,
             Rexiv2Error::Utf8(ref err) => Some(err),
             Rexiv2Error::Internal(_) => None
         }
@@ -345,8 +350,11 @@ impl Metadata {
     /// Return the media type of the loaded file.
     pub fn get_media_type(&self) -> Result<MediaType> {
         unsafe {
-            let c_str_mime = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
-            Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_mime).to_str())))
+            let c_str_val = gexiv2::gexiv2_metadata_get_mime_type(self.raw);
+            if c_str_val.is_null() {
+                return Err(Rexiv2Error::NoValue);
+            }
+            Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_val).to_str())))
         }
     }
 
@@ -489,6 +497,9 @@ impl Metadata {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
+            if c_str_val.is_null() {
+                return Err(Rexiv2Error::NoValue);
+            }
             let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
@@ -514,6 +525,9 @@ impl Metadata {
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
                                                                                c_str_tag.as_ptr());
+            if c_str_val.is_null() {
+                return Err(Rexiv2Error::NoValue);
+            }
             let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
@@ -732,8 +746,11 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 pub fn get_tag_label(tag: &str) -> Result<String> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
-        let c_str_label = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
-        Ok(try!(ffi::CStr::from_ptr(c_str_label).to_str()).to_string())
+        let c_str_val = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
+        if c_str_val.is_null() {
+            return Err(Rexiv2Error::NoValue);
+        }
+        Ok(try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string())
     }
 }
 
@@ -747,8 +764,11 @@ pub fn get_tag_label(tag: &str) -> Result<String> {
 pub fn get_tag_description(tag: &str) -> Result<String> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     unsafe {
-        let c_str_desc = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
-        Ok(try!(ffi::CStr::from_ptr(c_str_desc).to_str()).to_string())
+        let c_str_val = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
+        if c_str_val.is_null() {
+            return Err(Rexiv2Error::NoValue);
+        }
+        Ok(try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string())
     }
 }
 
@@ -762,8 +782,11 @@ pub fn get_tag_description(tag: &str) -> Result<String> {
 pub fn get_tag_type(tag: &str) -> Result<TagType> {
     let c_str_tag = ffi::CString::new(tag).unwrap();
     let tag_type = unsafe {
-        let c_str_type = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
-        try!(ffi::CStr::from_ptr(c_str_type).to_str())
+        let c_str_val = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
+        if c_str_val.is_null() {
+            return Err(Rexiv2Error::NoValue);
+        }
+        try!(ffi::CStr::from_ptr(c_str_val).to_str())
     };
     match tag_type {
         "Byte" => Ok(TagType::UnsignedByte),
