@@ -5,13 +5,61 @@ rust:
   - beta
   - nightly
 matrix:
+  include:
+    - os: osx
+      osx_image: xcode8.2
+      rust: stable
   allow_failures:
     - rust: nightly
-sudo: required
-dist: trusty
+addons:
+  apt:
+    packages:
+      - libgexiv2-dev
+      - libcurl4-openssl-dev
+      - libelf-dev
+      - libdw-dev
+      - binutils-dev
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y libgexiv2-dev
+  - |
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        pip install 'travis-cargo<0.2' --user
+        sed -i 's/stderr=sys.stderr/stderr=subprocess.STDOUT/' \
+            $HOME/.local/lib/python2.7/site-packages/travis_cargo.py
+        sed -i 's|\Running target/debug.*\$|\Running target/debug/(tests-.*)$|' \
+            $HOME/.local/lib/python2.7/site-packages/travis_cargo.py
+        rm $HOME/.local/lib/python2.7/site-packages/travis_cargo.pyc
+        export PATH=$HOME/.local/bin:$PATH
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        brew update
+        brew install gexiv2
+      else
+        echo "Unknown platform: $TRAVIS_OS_NAME"
+        exit 1
+      fi
+script:
+  - |
+      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+        travis-cargo build
+        travis-cargo test
+      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        cargo build --verbose
+        cargo test --verbose
+      else
+        echo "Unknown platform: $TRAVIS_OS_NAME"
+        exit 1
+      fi
+after_success:
+  - |
+      if [[ "$TRAVIS_OS_NAME" == "linux"
+         && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
+        mkdir target/kcov-deps/
+        travis-cargo coveralls --no-sudo --verify --exclude-pattern "tst/"
+      fi
+env:
+  global:
+    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
 notifications:
   email:
     on_success: never
+sudo: false
+dist: trusty
