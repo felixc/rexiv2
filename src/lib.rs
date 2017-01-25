@@ -39,9 +39,8 @@
 
 extern crate gexiv2_sys as gexiv2;
 extern crate libc;
-extern crate num;
+extern crate num_rational as rational;
 
-use num::rational;
 use std::ffi;
 use std::ptr;
 use std::str;
