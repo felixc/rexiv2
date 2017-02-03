@@ -62,13 +62,14 @@ Nightly, and some older releases — on a best-effort basis.
 
 If you encounter issues with one of these versions, or would like to test to
 ensure your changes are compatible with them, you’ll need a way to easily switch
-between Rust releases. The best tool for this is [multirust][multi].
+between Rust releases. The best tool for this is [rustup][rustup].
 
-After installation, you can switch versions by running commands like `multirust
-update beta && multirust default beta` (substituting the version you want in
-place of `beta`). Remember to switch back after you’re done!
+After installation, you can switch versions by running commands like `rustup
+update beta && rustup default beta` (substituting the version you want in place
+of `beta`). Remember to switch back after you’re done!
 
-[multi]: https://github.com/brson/multirust
+[rustup]: https://rustup.rs/
+
 
 
 Copyright & Licensing of Contributions
