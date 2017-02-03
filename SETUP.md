@@ -47,17 +47,20 @@ directly from their project download pages and install them manually:
 
 ### Mac OS X
 
-I currently do not know what steps are needed to install these dependencies on
-Mac OS X. You may be able to do so via unofficial package management systems
-such as Homebrew (using the [gexiv2][gexiv2-brew] formula) or MacPorts (using
-the [gexiv2][gexiv2-port] port).
+The simplest known way of installing the required dependencies on Mac OS X is
+with the Homebrew package manager, using the [gexiv2][gexiv2-brew] formula:
+
+```shell
+brew update
+brew install gexiv2
+```
+
+It may also be possible to install dependencies via MacPorts, using the
+[gexiv2][gexiv2-port] port, but I have not tested this. If you have more
+information, please consider contributing your knowledge to this document.
 
 Otherwise, you will likely have to download the dependencies directly from their
 project download pages: [Exiv2][exiv2-dl]; [gexiv2][gexiv2-dl].
-
-If you have more information, please consider contributing your knowledge to
-this document (see our sister-project gexiv2-sys’s
-[GitHub Issue #10](https://github.com/felixc/gexiv2-sys/issues/10)).
 
 ### Windows
 
