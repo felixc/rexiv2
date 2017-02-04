@@ -85,7 +85,7 @@ impl std::error::Error for Rexiv2Error {
         match *self {
             Rexiv2Error::NoValue => None,
             Rexiv2Error::Utf8(ref err) => Some(err),
-            Rexiv2Error::Internal(_) => None
+            Rexiv2Error::Internal(_) => None,
         }
     }
 }
@@ -169,7 +169,9 @@ pub enum TagType {
 }
 
 impl Default for TagType {
-    fn default() -> TagType { TagType::Unknown }
+    fn default() -> TagType {
+        TagType::Unknown
+    }
 }
 
 /// The media types that an image might have.
@@ -209,7 +211,7 @@ pub enum MediaType {
     /// image/tiff
     Tiff,
     /// Some other, unrecognized, media type, contained within.
-    Other(String)
+    Other(String),
 }
 
 impl<'a> std::convert::From<&'a MediaType> for String {
@@ -230,7 +232,7 @@ impl<'a> std::convert::From<&'a MediaType> for String {
             &MediaType::PanasonicRw2 => "image/x-panasonic-rw2".to_string(),
             &MediaType::Tga => "image/targa".to_string(),
             &MediaType::Tiff => "image/tiff".to_string(),
-            &MediaType::Other(ref s) => s.clone()
+            &MediaType::Other(ref s) => s.clone(),
         }
     }
 }
@@ -253,7 +255,7 @@ impl<'a> std::convert::From<&'a str> for MediaType {
             "image/x-panasonic-rw2" => MediaType::PanasonicRw2,
             "image/targa" => MediaType::Tga,
             "image/tiff" => MediaType::Tiff,
-            _ => MediaType::Other(t.to_string())
+            _ => MediaType::Other(t.to_string()),
         }
     }
 }
@@ -304,8 +306,10 @@ impl Metadata {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
-            let ok = gexiv2::gexiv2_metadata_open_buf(
-                metadata, data.as_ptr(), data.len() as libc::c_long, &mut err);
+            let ok = gexiv2::gexiv2_metadata_open_buf(metadata,
+                                                      data.as_ptr(),
+                                                      data.len() as libc::c_long,
+                                                      &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
                 return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
@@ -511,9 +515,11 @@ impl Metadata {
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
-                                                                           c_str_tag.as_ptr(),
-                                                                           c_str_val.as_ptr())) }
+        unsafe {
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
+                                                                      c_str_tag.as_ptr(),
+                                                                      c_str_val.as_ptr()))
+        }
     }
 
     /// Get the value of a tag as a string, potentially formatted for user-visible display.
@@ -566,9 +572,11 @@ impl Metadata {
         let c_strs = c_strs.unwrap();
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
-                                                                             c_str_tag.as_ptr(),
-                                                                             ptrs.as_mut_ptr())) }
+        unsafe {
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
+                                                                        c_str_tag.as_ptr(),
+                                                                        ptrs.as_mut_ptr()))
+        }
     }
 
     /// Get the value of a tag as a number.
@@ -584,9 +592,11 @@ impl Metadata {
     /// Only safe if the tag is really of a numeric type.
     pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
-                                                                         c_str_tag.as_ptr(),
-                                                                         value as libc::c_long)) }
+        unsafe {
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
+                                                                    c_str_tag.as_ptr(),
+                                                                    value as libc::c_long))
+        }
     }
 
     /// Get the value of a tag as a Rational.
@@ -596,8 +606,9 @@ impl Metadata {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
         let den = &mut 0;
-        match unsafe { gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag.as_ptr(),
-                                                                     num, den) } {
+        match unsafe {
+            gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag.as_ptr(), num, den)
+        } {
             0 => None,
             _ => Some(rational::Ratio::new(*num, *den)),
         }
@@ -679,10 +690,12 @@ impl Metadata {
 
     /// Save the specified GPS values to the metadata.
     pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<()> {
-        unsafe { int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw,
-                                                                         gps.longitude,
-                                                                         gps.latitude,
-                                                                         gps.altitude)) }
+        unsafe {
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw,
+                                                                    gps.longitude,
+                                                                    gps.latitude,
+                                                                    gps.altitude))
+        }
     }
 
     /// Remove all saved GPS information from the metadata.

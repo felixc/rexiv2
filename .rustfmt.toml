@@ -1,0 +1,10 @@
+fn_call_width = 80
+fn_args_layout = "Block"
+fn_arg_indent = "Tabbed"
+struct_lit_width = 80
+struct_variant_width = 80
+reorder_imported_names = true
+normalize_comments = true
+condense_wildcard_suffices = true
+take_source_hints = false
+write_mode = "Replace"
