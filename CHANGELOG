@@ -1,3 +1,7 @@
+2017-04-11 - v0.4.2
+  * Upgraded gexiv2-sys dependency to 0.7.
+  * Replaced num dependency with num-rational for faster builds.
+
 2016-10-04 - v0.4.1
   * Fix for potential crash due to dereferencing null pointer.
 
