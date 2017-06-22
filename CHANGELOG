@@ -1,3 +1,6 @@
+2017-06-21 - v0.5.0
+  * Require Rust 1.8 as the minimum supported version to match dependencies.
+
 2017-06-21 - v0.4.3
   * Pin version of num-traits to unbreak builds on older rustc versions.
 
