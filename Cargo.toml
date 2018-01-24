@@ -20,7 +20,7 @@ readme = "README.md"
 include = [
   "Cargo.toml",
   "README.md",
-  "CHANGELOG",
+  "CHANGELOG.md",
   "LICENSE",
   "SETUP.md",
   "src/**/*",

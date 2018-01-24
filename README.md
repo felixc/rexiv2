@@ -73,7 +73,7 @@ of feedback on the API as more users try it out. Such feedback is welcome, and
 having the API tried out in real applications is part of ensuring it’s ready for
 a 1.0 release.
 
-See the [`CHANGELOG`](CHANGELOG) file for a history of released versions.
+See the [`CHANGELOG`](CHANGELOG.md) file for a history of released versions.
 
 [semver]: http://semver.org/spec/v2.0.0.html
 

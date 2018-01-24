@@ -1,17 +1,17 @@
-2017-06-21 - v0.5.0
+## [v0.5.0] - 2017-06-21
   * Require Rust 1.8 as the minimum supported version to match dependencies.
 
-2017-06-21 - v0.4.3
+## [v0.4.3] - 2017-06-21
   * Pin version of num-traits to unbreak builds on older rustc versions.
 
-2017-04-11 - v0.4.2
+## [v0.4.2] - 2017-04-11
   * Upgraded gexiv2-sys dependency to 0.7.
   * Replaced num dependency with num-rational for faster builds.
 
-2016-10-04 - v0.4.1
+## [v0.4.1] - 2016-10-04
   * Fix for potential crash due to dereferencing null pointer.
 
-2016-07-21 - v0.4.0
+## [v0.4.0] - 2016-07-21
   * Path operations now accept anything that implements AsRef<ffi::OsStr>,
     which enables support for path::Paths in addition to strs.
   * Breaking change: Image media types are now represented by an enum instead of
@@ -23,43 +23,60 @@
   * Breaking change: Results are now using a library-specific alias that fixes
     all Err() instances as Rexiv2Error.
 
-2016-03-30 - v0.3.3
+## [v0.3.3] - 2016-03-30
   * Dependency cleanup: removed rustc-serialize & bumped gexiv2-sys.
   * Types implement more common useful traits.
   * Documentation improvements, including bundling setup instructions.
 
-2015-09-11 - v0.3.2
+## [v0.3.2] - 2015-09-11
   * Dependency version bump (gexiv2-sys to 0.5 and libc to 0.2).
 
-2015-09-20 - v0.3.1
+## [v0.3.1] - 2015-09-## 20
   * Fixed memory leak of some values returned over FFI boundary.
 
-2015-09-13 - v0.3.0
+## [v0.3.0] - 2015-09-13
   * All instances of success/failure boolean return values are now Results.
   * Fixed critical bug that caused dangling pointers and mysterious errors.
   * Updated to use latest gexiv2-sys FFI declarations.
 
-2015-04-30 - v0.2.3
+## [v0.2.3] - 2015-04-30
   * Library now builds with regular stable rustc.
 
-2015-04-03 - v0.2.2
-  * Updated to work with 1.0.0-nightly (d17d6e7f1 2015-04-02) (Note: not Beta!).
+## [v0.2.2] - 2015-04-03
+  * Updated to work with 1.0.0-nightly (d17d6e7f1 ## 2015-04-02) (Note: not Beta!).
   * More permissive and up-to-date dependency version requirements.
 
-2015-03-02 - v0.2.1
+## [v0.2.1] - 2015-03-02
   * Added support for loading metadata from byte-array data buffers.
   * Split gexiv2 FFI declarations off into separate gexiv2-sys crate dependency.
 
-2015-03-01 - v0.2.0
+## [v0.2.0] - 2015-03-01
   * The "get_tag_type" function now returns an item from an enum of data types.
   * Some methods that used to return magic numbers on error now return Options.
   * The "get_mime_type" method is renamed "get_media_type" for correctness.
   * Custom Rational type replaced by common num::rational::Ratio.
 
-2015-02-25 - v0.1.0
+## [v0.1.0] - 2015-02-25
   * First development release.
   * Added ability to set multiple string values for a tag.
   * Fixed array terminator bug when getting list of Exif tags.
 
-2015-02-21 - v0.1.0-pre
+## [v0.1.0-pre] - 2015-02-21
   * First preview release to solicit code review and feedback.
+
+
+[v0.5.0]: https://github.com/felixc/rexiv2/compare/v0.4.3...v0.5.0
+[v0.4.3]: https://github.com/felixc/rexiv2/compare/v0.4.2...v0.4.3
+[v0.4.2]: https://github.com/felixc/rexiv2/compare/v0.4.1...v0.4.2
+[v0.4.1]: https://github.com/felixc/rexiv2/compare/v0.4.0...v0.4.1
+[v0.4.0]: https://github.com/felixc/rexiv2/compare/v0.3.3...v0.4.0
+[v0.3.3]: https://github.com/felixc/rexiv2/compare/v0.3.2...v0.3.3
+[v0.3.2]: https://github.com/felixc/rexiv2/compare/v0.3.1...v0.3.2
+[v0.3.1]: https://github.com/felixc/rexiv2/compare/v0.3.0...v0.3.1
+[v0.3.0]: https://github.com/felixc/rexiv2/compare/v0.2.3...v0.3.0
+[v0.2.3]: https://github.com/felixc/rexiv2/compare/v0.2.2...v0.2.3
+[v0.2.2]: https://github.com/felixc/rexiv2/compare/v0.2.1...v0.2.2
+[v0.2.1]: https://github.com/felixc/rexiv2/compare/v0.2.0...v0.2.1
+[v0.2.0]: https://github.com/felixc/rexiv2/compare/v0.1.0...v0.2.0
+[v0.1.0]: https://github.com/felixc/rexiv2/compare/25c31ad...v0.1.0
+[v0.1.0-pre]: https://github.com/felixc/rexiv2/commit/25c31ad5a0bdbc51ce95e416f1931771fdfd950d
