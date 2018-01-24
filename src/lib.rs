@@ -547,6 +547,9 @@ impl Metadata {
         let mut vals = vec![];
         unsafe {
             let c_vals = gexiv2::gexiv2_metadata_get_tag_multiple(self.raw, c_str_tag.as_ptr());
+            if(c_vals.is_null()) {
+                return Ok(vals);
+            }
             let mut cur_offset = 0;
             while !(*c_vals.offset(cur_offset)).is_null() {
                 let value = ffi::CStr::from_ptr(*c_vals.offset(cur_offset)).to_str();
