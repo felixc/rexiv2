@@ -656,7 +656,7 @@ impl Metadata {
     /// Returns the f-number used by the camera taking the photograph.
     pub fn get_fnumber(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_fnumber(self.raw) } {
-            -1.0 => None,
+            error_value if error_value < 0.0 => None,  // gexiv2 returns -1.0 on error
             fnumber => Some(fnumber),
         }
     }
@@ -664,7 +664,7 @@ impl Metadata {
     /// Returns the focal length used by the camera taking the photograph.
     pub fn get_focal_length(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_focal_length(self.raw) } {
-            -1.0 => None,
+            error_value if error_value < 0.0 => None,  // gexiv2 returns -1.0 on error
             focal => Some(focal),
         }
     }
