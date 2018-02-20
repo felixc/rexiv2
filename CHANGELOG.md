@@ -1,3 +1,8 @@
+## [v0.6.0] - 2018-02-19
+  * Require Rust 1.20 as the minimum supported version to match dependencies.
+  * Fixed segfault bug in `get_tag_multiple_strings` when there are no results.
+  * Updated gexiv2-sys internal dependency.
+
 ## [v0.5.0] - 2017-06-21
   * Require Rust 1.8 as the minimum supported version to match dependencies.
 
@@ -65,6 +70,7 @@
   * First preview release to solicit code review and feedback.
 
 
+[v0.6.0]: https://github.com/felixc/rexiv2/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/felixc/rexiv2/compare/v0.4.3...v0.5.0
 [v0.4.3]: https://github.com/felixc/rexiv2/compare/v0.4.2...v0.4.3
 [v0.4.2]: https://github.com/felixc/rexiv2/compare/v0.4.1...v0.4.2
