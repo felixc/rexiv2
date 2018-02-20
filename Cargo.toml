@@ -34,3 +34,6 @@ num-rational = { version = "0.1", default-features = false }
 [[test]]
 name = "tests"
 path = "tst/main.rs"
+
+[badges]
+travis-ci = { repository = "felixc/rexiv2" }
