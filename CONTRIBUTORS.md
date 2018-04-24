@@ -6,4 +6,5 @@ Project Maintainer
 Contributors
 ------------
 * Einar Gangsø
+* Eric Trombly
 * Huon Wilson
