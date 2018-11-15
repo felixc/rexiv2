@@ -832,6 +832,26 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
     }
 }
 
+/// Initialize gexiv2.
+///
+/// This must be called in a thread-safe fashion before using rexiv2 in
+/// multi-threaded applications.
+///
+/// # Example
+/// ```
+/// use std::sync::{Once, ONCE_INIT};
+/// fn main() {
+///     static START: Once = ONCE_INIT;
+///
+///     START.call_once(|| unsafe {
+///         rexiv2::initialize().expect("Unable to initialize rexiv2");
+///     });
+/// }
+/// ```
+pub fn initialize() -> Result<()> {
+    unsafe { int_bool_to_result(gexiv2::gexiv2_initialize()) }
+}
+
 
 // XMP namespace management.
 
