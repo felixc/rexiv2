@@ -1,3 +1,7 @@
+## [v0.7.0] - 2018-11-25
+  * Added `initialize()` method for safe multi-threaded use.
+  * Dependency upgrades.
+
 ## [v0.6.0] - 2018-02-19
   * Require Rust 1.20 as the minimum supported version to match dependencies.
   * Fixed segfault bug in `get_tag_multiple_strings` when there are no results.
@@ -70,6 +74,7 @@
   * First preview release to solicit code review and feedback.
 
 
+[v0.7.0]: https://github.com/felixc/rexiv2/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/felixc/rexiv2/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/felixc/rexiv2/compare/v0.4.3...v0.5.0
 [v0.4.3]: https://github.com/felixc/rexiv2/compare/v0.4.2...v0.4.3
