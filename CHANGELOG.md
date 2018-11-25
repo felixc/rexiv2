@@ -40,7 +40,7 @@
 ## [v0.3.2] - 2015-09-11
   * Dependency version bump (gexiv2-sys to 0.5 and libc to 0.2).
 
-## [v0.3.1] - 2015-09-## 20
+## [v0.3.1] - 2015-09-20
   * Fixed memory leak of some values returned over FFI boundary.
 
 ## [v0.3.0] - 2015-09-13
