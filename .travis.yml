@@ -25,6 +25,7 @@ script:
       fi
       cargo build --verbose
       cargo test --verbose
+      cargo build --features raw-tag-access --verbose
 notifications:
   email:
     on_success: never
