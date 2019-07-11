@@ -675,6 +675,51 @@ impl Metadata {
         }
     }
 
+    // Thumbnail related methods.
+
+    /// Get the thumbnail stored in the EXIF data.
+    pub fn get_thumbnail(&self) -> Option<&[u8]> {
+        let mut data : *mut u8 = ptr::null_mut();
+        let mut size : libc::c_int = 0;
+        unsafe {
+            match gexiv2::gexiv2_metadata_get_exif_thumbnail(self.raw, &mut data, &mut size) {
+                0 => None,
+                _ => Some(std::slice::from_raw_parts_mut(data, size as usize)),
+            }
+        }
+    }
+
+    /// Remove the thumbnail from the EXIF data.
+    pub fn erase_thumbnail(&self) {
+        unsafe {
+            gexiv2::gexiv2_metadata_erase_exif_thumbnail(self.raw)
+        }
+    }
+
+    /// Set or replace the EXIF thumbnail with the image in the file.
+    pub fn set_thumbnail_from_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
+        let mut err: *mut gexiv2::GError = ptr::null_mut();
+        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
+        unsafe {
+            let ok = gexiv2::gexiv2_metadata_set_exif_thumbnail_from_file(self.raw,
+                                                                          c_str_path.as_ptr(),
+                                                                          &mut err);
+            if ok != 1 {
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
+            }
+            Ok (())
+        }
+    }
+
+    /// Set or replace the EXIF thumbnail with the content of a buffer.
+    pub fn set_thumbnail_from_buffer(&self, data: &[u8]) {
+        unsafe {
+            gexiv2::gexiv2_metadata_set_exif_thumbnail_from_buffer(self.raw,
+                                                                   data.as_ptr(),
+                                                                   data.len() as libc::c_int)
+        }
+    }
 
     // GPS-related methods.
 
