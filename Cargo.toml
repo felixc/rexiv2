@@ -32,6 +32,10 @@ include = [
 gexiv2-sys = "1.0"
 libc = "0.2"
 num-rational = { version = "0.2", default-features = false }
+glib-sys = { version = "*", optional = true }
+
+[features]
+raw-tag-access = ["gexiv2-sys/raw-tag-access", "glib-sys"]
 
 [[test]]
 name = "tests"
