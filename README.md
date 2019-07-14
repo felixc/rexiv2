@@ -50,7 +50,7 @@ come in handy.
 Setup & Dependencies
 --------------------
 
-rexiv2 requires Rust 1.20 or newer.
+rexiv2 requires Rust 1.31 or newer, and uses the 2018 edition of the language.
 
 Being a wrapper for gexiv2 and Exiv2, rexiv2 obviously depends on them. These
 libraries are not bundled with rexiv2: you will need to install them separately.

@@ -1,4 +1,4 @@
-// Copyright © 2015–2018 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// Copyright © 2015–2019 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -38,8 +38,6 @@
 #![crate_name = "rexiv2"]
 
 extern crate gexiv2_sys as gexiv2;
-extern crate libc;
-extern crate num_rational as rational;
 
 use std::ffi;
 use std::ptr;
@@ -357,7 +355,7 @@ impl Metadata {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_val).to_str())))
+            Ok(MediaType::from(ffi::CStr::from_ptr(c_str_val).to_str()?))
         }
     }
 
@@ -503,7 +501,7 @@ impl Metadata {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
+            let value = ffi::CStr::from_ptr(c_str_val).to_str()?.to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
         }
@@ -533,7 +531,7 @@ impl Metadata {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            let value = try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string();
+            let value = ffi::CStr::from_ptr(c_str_val).to_str()?.to_string();
             libc::free(c_str_val as *mut libc::c_void);
             Ok(value)
         }
@@ -605,7 +603,7 @@ impl Metadata {
     /// Get the value of a tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn get_tag_rational(&self, tag: &str) -> Option<rational::Ratio<i32>> {
+    pub fn get_tag_rational(&self, tag: &str) -> Option<num_rational::Ratio<i32>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
         let den = &mut 0;
@@ -613,14 +611,14 @@ impl Metadata {
             gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag.as_ptr(), num, den)
         } {
             0 => None,
-            _ => Some(rational::Ratio::new(*num, *den)),
+            _ => Some(num_rational::Ratio::new(*num, *den)),
         }
     }
 
     /// Set the value of a tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
-    pub fn set_tag_rational(&self, tag: &str, value: &rational::Ratio<i32>) -> Result<()> {
+    pub fn set_tag_rational(&self, tag: &str, value: &num_rational::Ratio<i32>) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
@@ -644,12 +642,12 @@ impl Metadata {
     }
 
     /// Returns the camera exposure time of the photograph.
-    pub fn get_exposure_time(&self) -> Option<rational::Ratio<i32>> {
+    pub fn get_exposure_time(&self) -> Option<num_rational::Ratio<i32>> {
         let num = &mut 0;
         let den = &mut 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exposure_time(self.raw, num, den) } {
             0 => None,
-            _ => Some(rational::Ratio::new(*num, *den)),
+            _ => Some(num_rational::Ratio::new(*num, *den)),
         }
     }
 
@@ -765,7 +763,7 @@ pub fn get_tag_label(tag: &str) -> Result<String> {
         if c_str_val.is_null() {
             return Err(Rexiv2Error::NoValue);
         }
-        Ok(try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string())
+        Ok(ffi::CStr::from_ptr(c_str_val).to_str()?.to_string())
     }
 }
 
@@ -783,7 +781,7 @@ pub fn get_tag_description(tag: &str) -> Result<String> {
         if c_str_val.is_null() {
             return Err(Rexiv2Error::NoValue);
         }
-        Ok(try!(ffi::CStr::from_ptr(c_str_val).to_str()).to_string())
+        Ok(ffi::CStr::from_ptr(c_str_val).to_str()?.to_string())
     }
 }
 
@@ -801,7 +799,7 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
         if c_str_val.is_null() {
             return Err(Rexiv2Error::NoValue);
         }
-        try!(ffi::CStr::from_ptr(c_str_val).to_str())
+        ffi::CStr::from_ptr(c_str_val).to_str()?
     };
     match tag_type {
         "Byte" => Ok(TagType::UnsignedByte),

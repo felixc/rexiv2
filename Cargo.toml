@@ -17,6 +17,8 @@ keywords = ["metadata", "exif", "iptc", "xmp", "photo"]
 categories = ["multimedia::images"]
 readme = "README.md"
 
+edition = "2018"
+
 include = [
   "Cargo.toml",
   "README.md",
