@@ -42,6 +42,7 @@ script:
         travis-cargo build
         travis-cargo test
       elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
         cargo build --verbose
         cargo test --verbose
       else

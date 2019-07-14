@@ -55,6 +55,14 @@ brew update
 brew install gexiv2
 ```
 
+Note that because of configuration choices made by some dependent libraries,
+you will have to specify where to find the `libffi` library before you can
+`cargo build`, by using:
+
+```shell
+export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
+```
+
 It may also be possible to install dependencies via MacPorts, using the
 [gexiv2][gexiv2-port] port, but I have not tested this. If you have more
 information, please consider contributing your knowledge to this document.
