@@ -7,7 +7,7 @@ rust:
 matrix:
   include:
     - os: osx
-      osx_image: xcode10.1
+      osx_image: xcode11
       rust: stable
   allow_failures:
     - rust: nightly
@@ -15,12 +15,9 @@ addons:
   apt:
     packages:
       - libgexiv2-dev
-before_install:
-  - |
-      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-        brew update
-        brew install gexiv2
-      fi
+  homebrew:
+    packages:
+      - gexiv2
 script:
   - |
       if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
