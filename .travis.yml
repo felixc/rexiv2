@@ -21,44 +21,17 @@ addons:
       - binutils-dev
 before_install:
   - |
-      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        pip install 'travis-cargo<0.2' --user
-        sed -i 's/stderr=sys.stderr/stderr=subprocess.STDOUT/' \
-            $HOME/.local/lib/python2.7/site-packages/travis_cargo.py
-        sed -i 's|\Running target/debug.*\$|\Running target/debug/(tests-.*)$|' \
-            $HOME/.local/lib/python2.7/site-packages/travis_cargo.py
-        rm $HOME/.local/lib/python2.7/site-packages/travis_cargo.pyc
-        export PATH=$HOME/.local/bin:$PATH
-      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         brew update
         brew install gexiv2
-      else
-        echo "Unknown platform: $TRAVIS_OS_NAME"
-        exit 1
       fi
 script:
   - |
-      if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-        travis-cargo build
-        travis-cargo test
-      elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+      if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
-        cargo build --verbose
-        cargo test --verbose
-      else
-        echo "Unknown platform: $TRAVIS_OS_NAME"
-        exit 1
       fi
-after_success:
-  - |
-      if [[ "$TRAVIS_OS_NAME" == "linux"
-         && "$TRAVIS_RUST_VERSION" == "stable" ]]; then
-        mkdir target/kcov-deps/
-        travis-cargo coveralls --no-sudo --verify --exclude-pattern "tst/"
-      fi
-env:
-  global:
-    - TRAVIS_CARGO_NIGHTLY_FEATURE=""
+      cargo build --verbose
+      cargo test --verbose
 notifications:
   email:
     on_success: never
