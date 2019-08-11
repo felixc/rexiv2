@@ -78,6 +78,15 @@ See the [`CHANGELOG`](CHANGELOG.md) file for a history of released versions.
 [semver]: http://semver.org/spec/v2.0.0.html
 
 
+Optional Features
+-----------------
+
+**raw-tag-access**: If you need access to the raw byte values of tags, you can
+enable this feature and gain the `get_tag_raw` function.
+
+This feature is disabled by default because it introduces a new dependency on
+[`glib-sys`][glib-sys], and consequently on the GLib system library.
+
 Contributions & Bug Reports
 ---------------------------
 
