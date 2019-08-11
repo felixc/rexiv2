@@ -9,3 +9,4 @@ Contributors
 * Eric Trombly
 * Huon Wilson
 * Wieland Hoffmann
+* Jean-Baptiste Daval
