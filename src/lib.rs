@@ -634,7 +634,7 @@ impl Metadata {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
             let raw = gexiv2::gexiv2_metadata_get_tag_raw(self.raw, c_str_tag.as_ptr());
-            let ptr = glib_sys::g_bytes_get_data(raw, std::ptr::null_mut()) as *const u8;
+            let ptr = glib_sys::g_bytes_unref_to_data(raw, std::ptr::null_mut()) as *const u8;
             let result = if ptr.is_null() {
                 Err(Rexiv2Error::NoValue)
             } else {
