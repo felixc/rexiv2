@@ -814,7 +814,7 @@ impl PreviewImage<'_> {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            Ok(MediaType::from(try!(ffi::CStr::from_ptr(c_str_val).to_str())))
+            Ok(MediaType::from(ffi::CStr::from_ptr(c_str_val).to_str()?))
         }
     }
 
@@ -825,7 +825,7 @@ impl PreviewImage<'_> {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            Ok((try!(ffi::CStr::from_ptr(c_str_val).to_str())).to_string())
+            Ok((ffi::CStr::from_ptr(c_str_val).to_str())?.to_string())
         }
     }
 
