@@ -87,6 +87,9 @@ enable this feature and gain the `get_tag_raw` function.
 This feature is disabled by default because it introduces a new dependency on
 [`glib-sys`][glib-sys], and consequently on the GLib system library.
 
+[glib-sys]: https://crates.io/crates/glib-sys/
+
+
 Contributions & Bug Reports
 ---------------------------
 
