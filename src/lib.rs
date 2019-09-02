@@ -79,7 +79,7 @@ impl std::error::Error for Rexiv2Error {
         }
     }
 
-    fn cause(&self) -> Option<&std::error::Error> {
+    fn cause(&self) -> Option<&dyn std::error::Error> {
         match *self {
             Rexiv2Error::NoValue => None,
             Rexiv2Error::Utf8(ref err) => Some(err),
