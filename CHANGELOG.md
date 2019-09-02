@@ -1,3 +1,9 @@
+## [v0.8.0] - 2019-09-02
+  * Added operations on metadata thumbnail images.
+  * Added way to get raw byte values of metadata.
+  * Added methods on preview images. All of these thanks to Jean-Baptiste Daval!
+  * Require Rust 1.31 as the minimum supported version (and use 2018 edition).
+
 ## [v0.7.0] - 2018-11-25
   * Added `initialize()` method for safe multi-threaded use.
   * Dependency upgrades.
@@ -52,7 +58,7 @@
   * Library now builds with regular stable rustc.
 
 ## [v0.2.2] - 2015-04-03
-  * Updated to work with 1.0.0-nightly (d17d6e7f1 ## 2015-04-02) (Note: not Beta!).
+  * Updated to work with 1.0.0-nightly (d17d6e7f1 2015-04-02) (Note: not Beta!).
   * More permissive and up-to-date dependency version requirements.
 
 ## [v0.2.1] - 2015-03-02
