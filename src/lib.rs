@@ -38,6 +38,7 @@
 #![crate_name = "rexiv2"]
 
 extern crate gexiv2_sys as gexiv2;
+pub use gexiv2::GExiv2LogLevel as LogLevel;
 
 use std::ffi;
 use std::ptr;
@@ -1078,6 +1079,31 @@ pub fn unregister_all_xmp_namespaces() {
     unsafe { gexiv2::gexiv2_metadata_unregister_all_xmp_namespaces() }
 }
 
+// Logging
+
+/// Get the GExiv2 log level.
+///
+/// # Examples
+/// ```
+/// assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);
+/// rexiv2::set_log_level(rexiv2::LogLevel::INFO);
+/// assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::INFO);
+/// ```
+pub fn get_log_level() -> LogLevel {
+    unsafe { gexiv2::gexiv2_log_get_level() }
+}
+
+/// Set the GExiv2 log level.
+///
+/// # Examples
+/// ```
+/// assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);
+/// rexiv2::set_log_level(rexiv2::LogLevel::INFO);
+/// assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::INFO);
+/// ```
+pub fn set_log_level(level: LogLevel) {
+    unsafe { gexiv2::gexiv2_log_set_level(level) }
+}
 
 // Private internal helpers.
 
