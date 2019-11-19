@@ -64,3 +64,10 @@ fn supports_xmp() {
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.supports_xmp(), true);
 }
+
+#[test]
+fn log_levels() {
+    assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);
+    rexiv2::set_log_level(rexiv2::LogLevel::INFO);
+    assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::INFO);
+}
