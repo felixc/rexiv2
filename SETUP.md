@@ -52,12 +52,11 @@ with the Homebrew package manager, using the [gexiv2][gexiv2-brew] formula:
 
 ```shell
 brew update
-brew install gexiv2
+brew install gexiv2 pgk-config
 ```
 
-Note that because of configuration choices made by some dependent libraries,
-you will have to specify where to find the `libffi` library before you can
-`cargo build`, by using:
+For the build to succeed, you will have to tell `pkg-config` where Homebrew
+installed some relevant libraries, using:
 
 ```shell
 export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
