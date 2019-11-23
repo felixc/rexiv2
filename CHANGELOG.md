@@ -1,3 +1,6 @@
+## [v0.9.0] - 2019-11-23
+  * Added functionality to get and set log levels, thanks to GitHub user t1ra.
+
 ## [v0.8.0] - 2019-09-02
   * Added operations on metadata thumbnail images.
   * Added way to get raw byte values of metadata.
