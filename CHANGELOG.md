@@ -1,3 +1,7 @@
+## [NEXT] - Unreleased
+  * Fixed build failure on arm32 due to invalid assumptions about int size.
+  * Fixed null pointer crash when using `get_tag_raw()`.
+
 ## [v0.9.0] - 2019-11-23
   * Added functionality to get and set log levels, thanks to GitHub user t1ra.
 
