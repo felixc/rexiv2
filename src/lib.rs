@@ -641,14 +641,17 @@ impl Metadata {
     pub fn get_tag_raw(&self, tag: &str) -> Result<Vec<u8>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            let raw = gexiv2::gexiv2_metadata_get_tag_raw(self.raw, c_str_tag.as_ptr());
-            let ptr = glib_sys::g_bytes_unref_to_data(raw, std::ptr::null_mut()) as *const u8;
+            let tag = gexiv2::gexiv2_metadata_get_tag_raw(self.raw, c_str_tag.as_ptr());
+            let size = &mut 0;
+            let ptr = glib_sys::g_bytes_get_data(tag, size) as *const u8;
             let result = if ptr.is_null() {
                 Err(Rexiv2Error::NoValue)
             } else {
-                Ok(std::slice::from_raw_parts(ptr, glib_sys::g_bytes_get_size(raw)).to_vec())
+                Ok(std::slice::from_raw_parts(ptr, *size).to_owned())
+                // Make a copy here
+                // Could be optimized away but it needs to keep a reference to the GByte object returned
             };
-            glib_sys::g_bytes_unref(raw);
+            glib_sys::g_bytes_unref(tag);
             result
         }
     }
