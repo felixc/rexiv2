@@ -876,7 +876,7 @@ impl PreviewImage<'_> {
             let ok = gexiv2::gexiv2_preview_image_write_file(image, c_str_path.as_ptr());
             gexiv2::gexiv2_preview_image_free(image);
 
-            let expected = self.get_size() as i64;
+            let expected = self.get_size() as libc::c_long;
             if ok != expected {
                 Err(Rexiv2Error::Internal(None))
             } else {
