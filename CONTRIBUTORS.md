@@ -10,3 +10,4 @@ Contributors
 * Huon Wilson
 * Wieland Hoffmann
 * Jean-Baptiste Daval
+* Riley Trautman
