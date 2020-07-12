@@ -7,8 +7,12 @@ fn main() {
         if let Ok(time) = meta.get_tag_string("Exif.Image.DateTime") {
             println!("Time: {:?}", time);
         }
-        if meta.set_tag_string("Exif.Image.DateTime", "2008:11:01 21:15:07").is_ok() {
-            meta.save_to_file("examples/example.jpg").expect("Couldn't save metadata to file");
+        if meta
+            .set_tag_string("Exif.Image.DateTime", "2008:11:01 21:15:07")
+            .is_ok()
+        {
+            meta.save_to_file("examples/example.jpg")
+                .expect("Couldn't save metadata to file");
         }
     }
 }

@@ -282,7 +282,9 @@ impl Metadata {
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
             }
             Ok(Metadata { raw: metadata })
         }
@@ -303,13 +305,17 @@ impl Metadata {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
-            let ok = gexiv2::gexiv2_metadata_open_buf(metadata,
-                                                      data.as_ptr(),
-                                                      data.len() as libc::c_long,
-                                                      &mut err);
+            let ok = gexiv2::gexiv2_metadata_open_buf(
+                metadata,
+                data.as_ptr(),
+                data.len() as libc::c_long,
+                &mut err,
+            );
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
             }
             Ok(Metadata { raw: metadata })
         }
@@ -323,7 +329,9 @@ impl Metadata {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
             }
             Ok(())
         }
@@ -513,9 +521,11 @@ impl Metadata {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
         unsafe {
-            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(self.raw,
-                                                                      c_str_tag.as_ptr(),
-                                                                      c_str_val.as_ptr()))
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(
+                self.raw,
+                c_str_tag.as_ptr(),
+                c_str_val.as_ptr(),
+            ))
         }
     }
 
@@ -525,8 +535,8 @@ impl Metadata {
     pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            let c_str_val = gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw,
-                                                                               c_str_tag.as_ptr());
+            let c_str_val =
+                gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag.as_ptr());
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
@@ -573,9 +583,11 @@ impl Metadata {
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
         unsafe {
-            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(self.raw,
-                                                                        c_str_tag.as_ptr(),
-                                                                        ptrs.as_mut_ptr()))
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_multiple(
+                self.raw,
+                c_str_tag.as_ptr(),
+                ptrs.as_mut_ptr(),
+            ))
         }
     }
 
@@ -593,9 +605,11 @@ impl Metadata {
     pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(self.raw,
-                                                                    c_str_tag.as_ptr(),
-                                                                    value as libc::c_long))
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(
+                self.raw,
+                c_str_tag.as_ptr(),
+                value as libc::c_long,
+            ))
         }
     }
 
@@ -620,10 +634,12 @@ impl Metadata {
     pub fn set_tag_rational(&self, tag: &str, value: &num_rational::Ratio<i32>) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
-            int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(self.raw,
-                                                                             c_str_tag.as_ptr(),
-                                                                             *value.numer(),
-                                                                             *value.denom()))
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(
+                self.raw,
+                c_str_tag.as_ptr(),
+                *value.numer(),
+                *value.denom(),
+            ))
         }
     }
 
@@ -672,7 +688,7 @@ impl Metadata {
     /// Returns the f-number used by the camera taking the photograph.
     pub fn get_fnumber(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_fnumber(self.raw) } {
-            error_value if error_value < 0.0 => None,  // gexiv2 returns -1.0 on error
+            error_value if error_value < 0.0 => None, // gexiv2 returns -1.0 on error
             fnumber => Some(fnumber),
         }
     }
@@ -680,7 +696,7 @@ impl Metadata {
     /// Returns the focal length used by the camera taking the photograph.
     pub fn get_focal_length(&self) -> Option<f64> {
         match unsafe { gexiv2::gexiv2_metadata_get_focal_length(self.raw) } {
-            error_value if error_value < 0.0 => None,  // gexiv2 returns -1.0 on error
+            error_value if error_value < 0.0 => None, // gexiv2 returns -1.0 on error
             focal => Some(focal),
         }
     }
@@ -697,8 +713,8 @@ impl Metadata {
 
     /// Get the thumbnail stored in the EXIF data.
     pub fn get_thumbnail(&self) -> Option<&[u8]> {
-        let mut data : *mut u8 = ptr::null_mut();
-        let mut size : libc::c_int = 0;
+        let mut data: *mut u8 = ptr::null_mut();
+        let mut size: libc::c_int = 0;
         unsafe {
             match gexiv2::gexiv2_metadata_get_exif_thumbnail(self.raw, &mut data, &mut size) {
                 0 => None,
@@ -709,9 +725,7 @@ impl Metadata {
 
     /// Remove the thumbnail from the EXIF data.
     pub fn erase_thumbnail(&self) {
-        unsafe {
-            gexiv2::gexiv2_metadata_erase_exif_thumbnail(self.raw)
-        }
+        unsafe { gexiv2::gexiv2_metadata_erase_exif_thumbnail(self.raw) }
     }
 
     /// Set or replace the EXIF thumbnail with the image in the file.
@@ -719,23 +733,29 @@ impl Metadata {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
         let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
-            let ok = gexiv2::gexiv2_metadata_set_exif_thumbnail_from_file(self.raw,
-                                                                          c_str_path.as_ptr(),
-                                                                          &mut err);
+            let ok = gexiv2::gexiv2_metadata_set_exif_thumbnail_from_file(
+                self.raw,
+                c_str_path.as_ptr(),
+                &mut err,
+            );
             if ok != 1 {
                 let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
-                return Err(Rexiv2Error::Internal(err_msg.ok().map(|msg| msg.to_string())));
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
             }
-            Ok (())
+            Ok(())
         }
     }
 
     /// Set or replace the EXIF thumbnail with the content of a buffer.
     pub fn set_thumbnail_from_buffer(&self, data: &[u8]) {
         unsafe {
-            gexiv2::gexiv2_metadata_set_exif_thumbnail_from_buffer(self.raw,
-                                                                   data.as_ptr(),
-                                                                   data.len() as libc::c_int)
+            gexiv2::gexiv2_metadata_set_exif_thumbnail_from_buffer(
+                self.raw,
+                data.as_ptr(),
+                data.len() as libc::c_int,
+            )
         }
     }
 
@@ -746,14 +766,17 @@ impl Metadata {
         unsafe {
             let ptr = gexiv2::gexiv2_metadata_get_preview_properties(self.raw);
             if ptr.is_null() {
-                return None
+                return None;
             }
 
-            let mut previews : Vec<PreviewImage> = vec![];
+            let mut previews: Vec<PreviewImage> = vec![];
             let mut n = 0;
             while !(*ptr.offset(n)).is_null() {
                 let preview_prop = *ptr.offset(n);
-                previews.push(PreviewImage { raw: preview_prop, metadata: self });
+                previews.push(PreviewImage {
+                    raw: preview_prop,
+                    metadata: self,
+                });
                 n += 1;
             }
             Some(previews)
@@ -769,17 +792,23 @@ impl Metadata {
         let alt = &mut 0.0;
         match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
             0 => None,
-            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt }),
+            _ => Some(GpsInfo {
+                longitude: *lon,
+                latitude: *lat,
+                altitude: *alt,
+            }),
         }
     }
 
     /// Save the specified GPS values to the metadata.
     pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<()> {
         unsafe {
-            int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(self.raw,
-                                                                    gps.longitude,
-                                                                    gps.latitude,
-                                                                    gps.altitude))
+            int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(
+                self.raw,
+                gps.longitude,
+                gps.latitude,
+                gps.altitude,
+            ))
         }
     }
 
@@ -796,26 +825,19 @@ impl Drop for Metadata {
 }
 
 impl PreviewImage<'_> {
-
     /// Return the size of the preview image in bytes.
     pub fn get_size(&self) -> u32 {
-        unsafe {
-            gexiv2::gexiv2_preview_properties_get_size(self.raw)
-        }
+        unsafe { gexiv2::gexiv2_preview_properties_get_size(self.raw) }
     }
 
     /// Return the width of the preview image.
     pub fn get_width(&self) -> u32 {
-        unsafe {
-            gexiv2::gexiv2_preview_properties_get_width(self.raw)
-        }
+        unsafe { gexiv2::gexiv2_preview_properties_get_width(self.raw) }
     }
 
     /// Return the height of the preview image.
     pub fn get_height(&self) -> u32 {
-        unsafe {
-            gexiv2::gexiv2_preview_properties_get_height(self.raw)
-        }
+        unsafe { gexiv2::gexiv2_preview_properties_get_height(self.raw) }
     }
 
     /// Return the media type of the preview image.
@@ -842,11 +864,10 @@ impl PreviewImage<'_> {
 
     /// Get the preview image data.
     pub fn get_data(&self) -> Result<Vec<u8>> {
-        let image = unsafe {
-            gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw)
-        };
+        let image =
+            unsafe { gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw) };
 
-        let mut size : libc::c_uint = 0;
+        let mut size: libc::c_uint = 0;
         unsafe {
             let data = gexiv2::gexiv2_preview_image_get_data(image, &mut size);
             let result = if data.is_null() {
@@ -861,9 +882,8 @@ impl PreviewImage<'_> {
 
     /// Save the preview image to a file.
     pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
-        let image = unsafe {
-            gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw)
-        };
+        let image =
+            unsafe { gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw) };
 
         let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
@@ -1037,8 +1057,10 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<()> {
     let c_str_name = ffi::CString::new(name).unwrap();
     let c_str_prefix = ffi::CString::new(prefix).unwrap();
     unsafe {
-        int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(c_str_name.as_ptr(),
-                                                                          c_str_prefix.as_ptr()))
+        int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(
+            c_str_name.as_ptr(),
+            c_str_prefix.as_ptr(),
+        ))
     }
 }
 
@@ -1057,7 +1079,9 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<()> {
 pub fn unregister_xmp_namespace(name: &str) -> Result<()> {
     let c_str_name = ffi::CString::new(name).unwrap();
     unsafe {
-        int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(c_str_name.as_ptr()))
+        int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(
+            c_str_name.as_ptr(),
+        ))
     }
 }
 

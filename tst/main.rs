@@ -43,8 +43,12 @@ fn new_from_buffer_error() {
     let mut bytes = include_bytes!("sample.png").to_vec();
     bytes.swap(0, 1);
     let meta_result = rexiv2::Metadata::new_from_buffer(&bytes);
-    assert_eq!(meta_result,
-               Err(rexiv2::Rexiv2Error::Internal(Some("unsupported format".to_string()))));
+    assert_eq!(
+        meta_result,
+        Err(rexiv2::Rexiv2Error::Internal(Some(
+            "unsupported format".to_string()
+        )))
+    );
 }
 
 #[test]
@@ -76,6 +80,10 @@ fn log_levels() {
 #[cfg(feature = "raw-tag-access")]
 fn get_tag_raw() {
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
-    meta.set_tag_string("Exif.Image.DateTime", "2020:07:12 11:16:35").unwrap();
-    assert_eq!(meta.get_tag_raw("Exif.Image.DateTime").unwrap(), b"2020:07:12 11:16:35\0");
+    meta.set_tag_string("Exif.Image.DateTime", "2020:07:12 11:16:35")
+        .unwrap();
+    assert_eq!(
+        meta.get_tag_raw("Exif.Image.DateTime").unwrap(),
+        b"2020:07:12 11:16:35\0"
+    );
 }
