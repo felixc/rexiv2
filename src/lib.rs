@@ -71,15 +71,6 @@ impl std::fmt::Display for Rexiv2Error {
 }
 
 impl std::error::Error for Rexiv2Error {
-    fn description(&self) -> &str {
-        match *self {
-            Rexiv2Error::NoValue => "No value found",
-            Rexiv2Error::Utf8(ref err) => err.description(),
-            Rexiv2Error::Internal(Some(ref msg)) => msg,
-            Rexiv2Error::Internal(None) => "Unknown internal error",
-        }
-    }
-
     fn cause(&self) -> Option<&dyn std::error::Error> {
         match *self {
             Rexiv2Error::NoValue => None,
@@ -222,23 +213,23 @@ pub enum MediaType {
 
 impl<'a> std::convert::From<&'a MediaType> for String {
     fn from(t: &MediaType) -> String {
-        match t {
-            &MediaType::Bmp => "image/x-ms-bmp".to_string(),
-            &MediaType::CanonCr2 => "image/x-canon-cr2".to_string(),
-            &MediaType::CanonCrw => "image/x-canon-crw".to_string(),
-            &MediaType::Eps => "application/postscript".to_string(),
-            &MediaType::FujiRaf => "image/x-fuji-raf".to_string(),
-            &MediaType::Gif => "image/gif".to_string(),
-            &MediaType::Jp2 => "image/jp2".to_string(),
-            &MediaType::Jpeg => "image/jpeg".to_string(),
-            &MediaType::MinoltaMrw => "image/x-minolta-mrw".to_string(),
-            &MediaType::OlympusOrf => "image/x-olympus-orf".to_string(),
-            &MediaType::Png => "image/png".to_string(),
-            &MediaType::Psd => "image/x-photoshop".to_string(),
-            &MediaType::PanasonicRw2 => "image/x-panasonic-rw2".to_string(),
-            &MediaType::Tga => "image/targa".to_string(),
-            &MediaType::Tiff => "image/tiff".to_string(),
-            &MediaType::Other(ref s) => s.clone(),
+        match *t {
+            MediaType::Bmp => "image/x-ms-bmp".to_string(),
+            MediaType::CanonCr2 => "image/x-canon-cr2".to_string(),
+            MediaType::CanonCrw => "image/x-canon-crw".to_string(),
+            MediaType::Eps => "application/postscript".to_string(),
+            MediaType::FujiRaf => "image/x-fuji-raf".to_string(),
+            MediaType::Gif => "image/gif".to_string(),
+            MediaType::Jp2 => "image/jp2".to_string(),
+            MediaType::Jpeg => "image/jpeg".to_string(),
+            MediaType::MinoltaMrw => "image/x-minolta-mrw".to_string(),
+            MediaType::OlympusOrf => "image/x-olympus-orf".to_string(),
+            MediaType::Png => "image/png".to_string(),
+            MediaType::Psd => "image/x-photoshop".to_string(),
+            MediaType::PanasonicRw2 => "image/x-panasonic-rw2".to_string(),
+            MediaType::Tga => "image/targa".to_string(),
+            MediaType::Tiff => "image/tiff".to_string(),
+            MediaType::Other(ref s) => s.clone(),
         }
     }
 }
