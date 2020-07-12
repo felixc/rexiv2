@@ -94,7 +94,7 @@ adding a dependency on rexiv2 in your crate’s `Cargo.toml` file:
 
 ```toml
 [dependencies]
-rexiv2 = "0.9.1"
+rexiv2 = "0.10"
 ```
 
 Alternatively, if you’d like to work off of the bleeding edge (note that this is

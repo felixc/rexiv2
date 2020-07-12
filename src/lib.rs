@@ -1,4 +1,4 @@
-// Copyright © 2015–2020 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// Copyright © 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -1033,20 +1033,37 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
 ///
 /// # See also
 ///
-/// Associated Gexiv2 Source Code: https://gitlab.gnome.org/GNOME/gexiv2/-/blob/e4d65b31cd77f28ef248117e161de9d8cc31d712/gexiv2/gexiv2-startup.cpp#L14
+/// Associated Gexiv2 source code: https://gitlab.gnome.org/GNOME/gexiv2/-/blob/e4d65b31cd77f28ef248117e161de9d8cc31d712/gexiv2/gexiv2-startup.cpp#L14
 ///
 /// # Examples
 ///
-/// Simple call at the start of the application
+/// It is normally sufficient to simply call the function in the usual
+/// obvious way:
 ///
 /// ```
 /// fn main() {
 ///     rexiv2::initialize().expect("Unable to initialize rexiv2");
 /// }
 /// ```
+///
+/// However if you have a more complex multi-threaded environment, you
+/// might want to ensure the function only gets set up once:
+///
+/// ```
+/// use std::sync::{Once, ONCE_INIT};
+///
+/// fn main() {
+///     static START: Once = ONCE_INIT;
+///
+///     START.call_once(|| unsafe {
+///         rexiv2::initialize().expect("Unable to initialize rexiv2");
+///     });
+/// }
+/// ```
 pub fn initialize() -> Result<()> {
     unsafe { int_bool_to_result(gexiv2::gexiv2_initialize()) }
 }
+
 
 // XMP namespace management.
 

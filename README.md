@@ -18,10 +18,10 @@ rexiv2
 Rust library for working with media file metadata
 -------------------------------------------------
 
-This library provides a Rust wrapper around the [gexiv2][gexiv2] library,
-which is a GObject-based wrapper around the [Exiv2][exiv2] library, which
-provides read and write access to the Exif, XMP, and IPTC metadata in media
-files (typically photos) in various formats.
+This crate provides a Rust wrapper around the [gexiv2][gexiv2] library, which is
+a GObject-based wrapper around [Exiv2][exiv2], which provides read and write
+access to the Exif, XMP, and IPTC metadata in media files (typically photos) in
+various formats.
 
 [gexiv2]: https://wiki.gnome.org/Projects/gexiv2
 [exiv2]:  http://www.exiv2.org/
@@ -50,7 +50,7 @@ come in handy.
 Setup & Dependencies
 --------------------
 
-rexiv2 requires Rust 1.31 or newer, and uses the 2018 edition of the language.
+rexiv2 requires Rust 1.56 or newer, and uses the 2021 edition of the language.
 
 Being a wrapper for gexiv2 and Exiv2, rexiv2 obviously depends on them. These
 libraries are not bundled with rexiv2: you will need to install them separately.
@@ -61,10 +61,11 @@ For full instructions on how to get started with rexiv2, including how to
 install the prerequisite dependencies, refer to the [`SETUP`](SETUP.md) file.
 
 Note that if you want BMFF support (e.g. HEIC, HEIF, AVIF, CR3, JXL/bmff files)
-you will need an up to date version of the underlying libraries (gexiv2 v0.13.0 and Exiv2 v0.27.4).
-You will also need to ensure that your version of Exiv2 has BMFF support enabled.
-This is generally enabled by default, but may be switched off in certain distributions
-due to licensing issues.
+you will need an up-to-date version of the underlying libraries (at least gexiv2
+v0.13.0 and Exiv2 v0.27.4). You will also need to ensure that your version of
+Exiv2 has BMFF support enabled. This is generally enabled by default, but may be
+switched off in certain distributions due to licensing issues.
+
 
 Versioning & History
 --------------------

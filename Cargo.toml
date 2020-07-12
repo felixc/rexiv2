@@ -17,7 +17,8 @@ keywords = ["metadata", "exif", "iptc", "xmp", "photo"]
 categories = ["multimedia::images"]
 readme = "README.md"
 
-edition = "2018"
+edition = "2021"
+rust-version = "1.56"
 
 include = [
   "Cargo.toml",
@@ -29,10 +30,10 @@ include = [
 ]
 
 [dependencies]
-gexiv2-sys = "^1.1.1"
+gexiv2-sys = "1.2"
 libc = "0.2"
-num-rational = { version = "0.2", default-features = false }
-glib-sys = { version = "0.9", optional = true }
+num-rational = { version = "0.4", default-features = false }
+glib-sys = { version = "0.15", optional = true }
 
 [features]
 raw-tag-access = ["gexiv2-sys/raw-tag-access", "glib-sys"]

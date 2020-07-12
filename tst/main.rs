@@ -1,4 +1,4 @@
-// Copyright © 2016–2020 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// Copyright © 2016–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -21,14 +21,7 @@ use std::sync::Once;
 
 static INIT: Once = Once::new();
 
-///
 /// Should be called before any test runs. Will ensure that the library is initialized at most once.
-/// This would be the equivalent of a "beforeAll" function in other test libraries.
-///
-/// Future work: At some strange it might be good to work out if this can be done automatically
-/// by the test runner. It doesn't seem to be right now with the stock cargo test runner but
-/// it might be possible with 3rd party crates.
-///
 fn setup_test() {
     INIT.call_once(|| rexiv2::initialize().expect("Unable to initialize rexiv2"));
 }
