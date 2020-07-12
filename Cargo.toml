@@ -7,7 +7,7 @@ write access to the Exif, XMP, and IPTC metadata in media files (typically
 photos) in various formats.
 """
 
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Felix Crux <felixc@felixcrux.com>"]
 license = "GPL-3.0+"
 documentation = "https://felixcrux.com/files/doc/rexiv2/"
