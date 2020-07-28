@@ -1,4 +1,4 @@
-// Copyright © 2016–2019 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// Copyright © 2016–2020 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,8 +43,12 @@ fn new_from_buffer_error() {
     let mut bytes = include_bytes!("sample.png").to_vec();
     bytes.swap(0, 1);
     let meta_result = rexiv2::Metadata::new_from_buffer(&bytes);
-    assert_eq!(meta_result,
-               Err(rexiv2::Rexiv2Error::Internal(Some("unsupported format".to_string()))));
+    assert_eq!(
+        meta_result,
+        Err(rexiv2::Rexiv2Error::Internal(Some(
+            "unsupported format".to_string()
+        )))
+    );
 }
 
 #[test]
@@ -70,4 +74,16 @@ fn log_levels() {
     assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);
     rexiv2::set_log_level(rexiv2::LogLevel::INFO);
     assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::INFO);
+}
+
+#[test]
+#[cfg(feature = "raw-tag-access")]
+fn get_tag_raw() {
+    let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
+    meta.set_tag_string("Exif.Image.DateTime", "2020:07:12 11:16:35")
+        .unwrap();
+    assert_eq!(
+        meta.get_tag_raw("Exif.Image.DateTime").unwrap(),
+        b"2020:07:12 11:16:35\0"
+    );
 }

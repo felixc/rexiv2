@@ -23,9 +23,10 @@ script:
       if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
         export PKG_CONFIG_PATH="/usr/local/opt/libffi/lib/pkgconfig"
       fi
-      cargo build --verbose
-      cargo test --verbose
-      cargo build --features raw-tag-access --verbose
+      cargo build --verbose --all-features
+      cargo test --verbose --all-features
+      cargo run --example gps
+      cargo run --example timestamp
 notifications:
   email:
     on_success: never
