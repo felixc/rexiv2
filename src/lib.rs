@@ -785,6 +785,33 @@ impl Metadata {
 
     // GPS-related methods.
 
+    /// Retrieve the stored GPS latitude from the loaded file.
+    pub fn get_gps_latitude(&self) -> Option<f64> {
+        let lat = &mut 0.0;
+        match unsafe { gexiv2::gexiv2_metadata_get_gps_latitude(self.raw, lat) } {
+            0 => None,
+            _ => Some(*lat),
+        }
+    }
+
+    /// Retrieve the stored GPS longitude from the loaded file.
+    pub fn get_gps_longitude(&self) -> Option<f64> {
+        let lon = &mut 0.0;
+        match unsafe { gexiv2::gexiv2_metadata_get_gps_longitude(self.raw, lon) } {
+            0 => None,
+            _ => Some(*lon),
+        }
+    }
+
+    /// Retrieve the stored GPS altitude from the loaded file.
+    pub fn get_gps_altitude(&self) -> Option<f64> {
+        let alt = &mut 0.0;
+        match unsafe { gexiv2::gexiv2_metadata_get_gps_altitude(self.raw, alt) } {
+            0 => None,
+            _ => Some(*alt),
+        }
+    }
+
     /// Retrieve the stored GPS information from the loaded file.
     pub fn get_gps_info(&self) -> Option<GpsInfo> {
         let lon = &mut 0.0;
