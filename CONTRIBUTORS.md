@@ -11,3 +11,4 @@ Contributors
 * Wieland Hoffmann
 * Jean-Baptiste Daval
 * Riley Trautman
+* Jonas Hagen
