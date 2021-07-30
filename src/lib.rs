@@ -107,7 +107,7 @@ pub struct PreviewImage<'a> {
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
-    pub altitude: f64,
+    pub altitude: Option<f64>,
 }
 
 /// The possible data types that a tag can have.
@@ -814,27 +814,25 @@ impl Metadata {
 
     /// Retrieve the stored GPS information from the loaded file.
     pub fn get_gps_info(&self) -> Option<GpsInfo> {
-        let lon = &mut 0.0;
-        let lat = &mut 0.0;
-        let alt = &mut 0.0;
-        match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
-            0 => None,
-            _ => Some(GpsInfo {
-                longitude: *lon,
-                latitude: *lat,
-                altitude: *alt,
+        let lat = self.get_gps_latitude();
+        let lon = self.get_gps_longitude();
+        let altitude = self.get_gps_altitude();
+
+        match (lat, lon) {
+            (Some(latitude), Some(longitude)) => Some(GpsInfo {
+                latitude,
+                longitude,
+                altitude,
             }),
+            _ => None,
         }
     }
 
-    /// Save the specified GPS values to the metadata.
-    pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<()> {
+    /// Save the specified GPS coordinates to the metadata.
+    pub fn set_gps_info(&self, latitude: f64, longitude: f64, altitude: f64) -> Result<()> {
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(
-                self.raw,
-                gps.longitude,
-                gps.latitude,
-                gps.altitude,
+                self.raw, longitude, latitude, altitude,
             ))
         }
     }
