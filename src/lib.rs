@@ -95,11 +95,18 @@ pub struct Metadata {
     raw: *mut gexiv2::GExiv2Metadata,
 }
 
+/// A proxy type that holds a pointer to an array of byte and free it on drop
+#[derive(Debug)]
+pub struct Thumbnail<'a> {
+    pub data: &'a [u8],
+    raw: *mut u8,
+}
+
 /// An opaque structure that serves as a container for a preview image.
 #[derive(Debug, PartialEq)]
-pub struct PreviewImage<'a> {
-    raw: *mut gexiv2::GExiv2PreviewProperties,
-    metadata: &'a Metadata, // Parent metadata to load a PreviewImage from a PreviewProperties.
+pub struct PreviewImage {
+    prop: *mut gexiv2::GExiv2PreviewProperties,
+    img: *mut gexiv2::GExiv2PreviewImage,
 }
 
 /// Container for the three GPS coordinates: longitude, latitude, and altitude.
@@ -712,13 +719,19 @@ impl Metadata {
     // Thumbnail related methods.
 
     /// Get the thumbnail stored in the EXIF data.
-    pub fn get_thumbnail(&self) -> Option<&[u8]> {
-        let mut data: *mut u8 = ptr::null_mut();
-        let mut size: libc::c_int = 0;
+    pub fn get_thumbnail(&self) -> Option<Thumbnail> {
+        let mut ptr: *mut u8 = ptr::null_mut();
+        let size = &mut 0;
+
         unsafe {
-            match gexiv2::gexiv2_metadata_get_exif_thumbnail(self.raw, &mut data, &mut size) {
+            match gexiv2::gexiv2_metadata_get_exif_thumbnail(self.raw, &mut ptr, size) {
                 0 => None,
-                _ => Some(std::slice::from_raw_parts_mut(data, size as usize)),
+                _ => Some(Thumbnail {
+                    data: std::slice::from_raw_parts_mut(ptr, *size as usize),
+                    raw: ptr,
+                }),
+                // We must use a proxy type here to keep track of the pointer to the tumbnail data
+                // so we can free that data on drop
             }
         }
     }
@@ -769,14 +782,13 @@ impl Metadata {
                 return None;
             }
 
-            let mut previews: Vec<PreviewImage> = vec![];
+            let mut previews : Vec<PreviewImage> = Vec::new();
             let mut n = 0;
             while !(*ptr.offset(n)).is_null() {
                 let preview_prop = *ptr.offset(n);
-                previews.push(PreviewImage {
-                    raw: preview_prop,
-                    metadata: self,
-                });
+                let image = gexiv2::gexiv2_metadata_get_preview_image(self.raw, preview_prop);
+                previews.push(PreviewImage { prop: preview_prop, img: image });
+
                 n += 1;
             }
             Some(previews)
@@ -824,26 +836,47 @@ impl Drop for Metadata {
     }
 }
 
-impl PreviewImage<'_> {
+impl Drop for Thumbnail<'_> {
+    fn drop(&mut self) {
+        unsafe { libc::free(self.raw as *mut libc::c_void) }
+    }
+}
+
+impl Drop for PreviewImage {
+    fn drop(&mut self) {
+        unsafe { gexiv2::gexiv2_preview_image_free(self.img) }
+        // Deprecated, we should use glib's g_objeect_unref instead
+    }
+}
+
+impl PreviewImage {
     /// Return the size of the preview image in bytes.
     pub fn get_size(&self) -> u32 {
-        unsafe { gexiv2::gexiv2_preview_properties_get_size(self.raw) }
+        unsafe {
+            gexiv2::gexiv2_preview_properties_get_size(self.prop)
+        }
+
     }
 
     /// Return the width of the preview image.
     pub fn get_width(&self) -> u32 {
-        unsafe { gexiv2::gexiv2_preview_properties_get_width(self.raw) }
+        unsafe {
+            gexiv2::gexiv2_preview_properties_get_width(self.prop)
+        }
     }
 
     /// Return the height of the preview image.
     pub fn get_height(&self) -> u32 {
-        unsafe { gexiv2::gexiv2_preview_properties_get_height(self.raw) }
+        unsafe {
+            gexiv2::gexiv2_preview_properties_get_height(self.prop)
+        }
+
     }
 
     /// Return the media type of the preview image.
     pub fn get_media_type(&self) -> Result<MediaType> {
         unsafe {
-            let c_str_val = gexiv2::gexiv2_preview_properties_get_mime_type(self.raw);
+            let c_str_val = gexiv2::gexiv2_preview_properties_get_mime_type(self.prop);
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
@@ -854,7 +887,7 @@ impl PreviewImage<'_> {
     /// Return the preview image's recommended file extension.
     pub fn get_extension(&self) -> Result<String> {
         unsafe {
-            let c_str_val = gexiv2::gexiv2_preview_properties_get_extension(self.raw);
+            let c_str_val = gexiv2::gexiv2_preview_properties_get_extension(self.prop);
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
@@ -863,32 +896,25 @@ impl PreviewImage<'_> {
     }
 
     /// Get the preview image data.
-    pub fn get_data(&self) -> Result<Vec<u8>> {
-        let image =
-            unsafe { gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw) };
+    pub fn get_data(&self) -> Result<&mut [u8]> {
+        let size = &mut 0;
 
-        let mut size: libc::c_uint = 0;
         unsafe {
-            let data = gexiv2::gexiv2_preview_image_get_data(image, &mut size);
-            let result = if data.is_null() {
+            let ptr = gexiv2::gexiv2_preview_image_get_data(self.img, size);
+            let result = if ptr.is_null() {
                 Err(Rexiv2Error::NoValue)
             } else {
-                Ok(std::slice::from_raw_parts_mut(data as *mut u8, size as usize).to_vec())
+                Ok(std::slice::from_raw_parts_mut(ptr as *mut u8, *size as usize))
             };
-            gexiv2::gexiv2_preview_image_free(image);
             result
         }
     }
 
     /// Save the preview image to a file.
     pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
-        let image =
-            unsafe { gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw) };
-
         let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
-            let ok = gexiv2::gexiv2_preview_image_write_file(image, c_str_path.as_ptr());
-            gexiv2::gexiv2_preview_image_free(image);
+            let ok = gexiv2::gexiv2_preview_image_write_file(self.img, c_str_path.as_ptr());
 
             let expected = self.get_size() as libc::c_long;
             if ok != expected {
