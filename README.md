@@ -60,6 +60,11 @@ gexiv2 is supported from version 0.10 onwards, and Exiv2 from version 0.23.
 For full instructions on how to get started with rexiv2, including how to
 install the prerequisite dependencies, refer to the [`SETUP`](SETUP.md) file.
 
+Note that if you want BMFF support (e.g. HEIC, HEIF, AVIF, CR3, JXL/bmff files)
+you will need an up to date version of the underlying libraries (gexiv2 v0.13.0 and Exiv2 v0.27.4).
+You will also need to ensure that your version of Exiv2 has BMFF support enabled.
+This is generally enabled by default, but may be switched off in certain distributions
+due to licensing issues.
 
 Versioning & History
 --------------------
