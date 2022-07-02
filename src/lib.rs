@@ -1021,24 +1021,32 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
 
 /// Initialize gexiv2.
 ///
-/// This must be called in a thread-safe fashion before using rexiv2 in
-/// multi-threaded applications.
+/// This must be called in a thread-safe fashion before using rexiv2.
+/// The library may appear to work without calling this, but some
+/// features such as HEIC/BMFF will silently fail, and the underlying
+/// libraries make the assumption that this will be called so it
+/// is safer to do so.
 ///
-/// # Example
+/// Calling it first thing in the main function should ensure that
+/// it is executed on the main thread and is thread safe. Do not call
+/// it in a threaded or async context (such as in a tokio context).
+///
+/// # See also
+///
+/// Associated Gexiv2 Source Code: https://gitlab.gnome.org/GNOME/gexiv2/-/blob/e4d65b31cd77f28ef248117e161de9d8cc31d712/gexiv2/gexiv2-startup.cpp#L14
+///
+/// # Examples
+///
+/// Simple call at the start of the application
+///
 /// ```
-/// use std::sync::{Once, ONCE_INIT};
 /// fn main() {
-///     static START: Once = ONCE_INIT;
-///
-///     START.call_once(|| unsafe {
-///         rexiv2::initialize().expect("Unable to initialize rexiv2");
-///     });
+///     rexiv2::initialize().expect("Unable to initialize rexiv2");
 /// }
 /// ```
 pub fn initialize() -> Result<()> {
     unsafe { int_bool_to_result(gexiv2::gexiv2_initialize()) }
 }
-
 
 // XMP namespace management.
 
