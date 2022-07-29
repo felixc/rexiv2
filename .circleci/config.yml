@@ -1,0 +1,78 @@
+version: 2.1
+
+
+commands:
+  build_and_test_steps:
+    description: "Build the library and test it"
+    steps:
+      - checkout
+      - run:
+          name: Install system dependencies
+          command: |
+            case "$(uname -s)" in
+              Linux*)
+                apt --quiet update
+                apt --yes install libgexiv2-dev
+                ;;
+              Darwin*)
+                brew install gexiv2 pkg-config
+                curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+                ;;
+            esac
+      - run:
+          name: Show environment info
+          command: |
+            rustc --version --verbose && echo ""
+            cargo --version --verbose && echo ""
+            case "$(uname -s)" in
+              Linux*)
+                dpkg --list libgexiv2-dev libexiv2-dev ;;
+              Darwin*)
+                brew list --versions gexiv2 exiv2 ;;
+            esac
+      - run:
+          name: Build
+          command: cargo build --verbose --all-features
+      - run:
+          name: Test
+          command: cargo test --verbose --all-features
+      - run:
+          name: Run Examples
+          command: |
+            cargo run --example gps
+            cargo run --example timestamp
+
+
+linux_job_config: &linux_job_config
+  resource_class: small
+  steps:
+    - build_and_test_steps
+
+
+jobs:
+  linux-msrv:
+    docker:
+      - image: rust:1.56-slim
+    <<: *linux_job_config
+  linux-stable:
+    docker:
+      - image: rust:slim
+    <<: *linux_job_config
+  linux-nightly:
+    docker:
+      - image: rustlang/rust:nightly-slim
+    <<: *linux_job_config
+  osx-stable:
+    macos:
+      xcode: "14.0.0"
+    steps:
+      - build_and_test_steps
+
+
+workflows:
+  build-and-test:
+    jobs:
+      - linux-msrv
+      - linux-stable
+      - linux-nightly
+      - osx-stable

@@ -13,6 +13,7 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+extern crate gexiv2_sys as gexiv2;
 extern crate rexiv2;
 
 use std::path::Path;
@@ -22,13 +23,13 @@ use std::sync::Once;
 static INIT: Once = Once::new();
 
 /// Should be called before any test runs. Will ensure that the library is initialized at most once.
-fn setup_test() {
+fn test_setup() {
     INIT.call_once(|| rexiv2::initialize().expect("Unable to initialize rexiv2"));
 }
 
 #[test]
 fn new_from_str_path() {
-    setup_test();
+    test_setup();
     let sample_path = concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png");
     let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
     assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
@@ -36,7 +37,7 @@ fn new_from_str_path() {
 
 #[test]
 fn new_from_path() {
-    setup_test();
+    test_setup();
     let sample_path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/tst/sample.png"));
     let meta = rexiv2::Metadata::new_from_path(sample_path).unwrap();
     assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
@@ -44,14 +45,14 @@ fn new_from_path() {
 
 #[test]
 fn new_from_buffer() {
-    setup_test();
+    test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
 }
 
 #[test]
 fn new_from_buffer_error() {
-    setup_test();
+    test_setup();
     let mut bytes = include_bytes!("sample.png").to_vec();
     bytes.swap(0, 1);
     let meta_result = rexiv2::Metadata::new_from_buffer(&bytes);
@@ -65,31 +66,35 @@ fn new_from_buffer_error() {
 
 #[test]
 fn supports_exif() {
-    setup_test();
+    test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.supports_exif(), true);
 }
 
 #[test]
 fn supports_iptc() {
-    setup_test();
+    test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.supports_iptc(), true);
 }
 
 #[test]
 fn supports_xmp() {
-    setup_test();
+    test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     assert_eq!(meta.supports_xmp(), true);
 }
 
 #[test]
 fn supports_bmff() {
-    setup_test();
-    // iPhone devices use the HEIC (BMFF) file format which only works properly after gexiv2 has been initialized
-    // (and the underlying libraries are the right version gexiv2 v0.13.0/Exiv2 v0.27.4)
-    // I copied a photo off an iPhone and shrunk it down to ensure that reading tags works
+    test_setup();
+
+    // iPhone devices use the HEIC (BMFF) file format which only works properly
+    // after gexiv2 has been initialized (and the underlying libraries are the
+    // right version gexiv2 v0.13.0/Exiv2 v0.27.4)
+    if unsafe { gexiv2::gexiv2_get_version() } < 1300 {
+      return;
+    }
 
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.HEIC")).unwrap();
     let gps = meta.get_gps_info().unwrap();
@@ -107,7 +112,7 @@ fn supports_bmff() {
 
 #[test]
 fn log_levels() {
-    setup_test();
+    test_setup();
     assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);
     rexiv2::set_log_level(rexiv2::LogLevel::INFO);
     assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::INFO);
@@ -116,7 +121,7 @@ fn log_levels() {
 #[test]
 #[cfg(feature = "raw-tag-access")]
 fn get_tag_raw() {
-    setup_test();
+    test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
     meta.set_tag_string("Exif.Image.DateTime", "2020:07:12 11:16:35")
         .unwrap();

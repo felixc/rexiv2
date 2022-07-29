@@ -1,13 +1,13 @@
 rexiv2
 ======
 
-[![build-badge][]][build] &nbsp;
-[![downloads-badge][]][crates-io] &nbsp;
-[![version-badge][]][crates-io] &nbsp;
-[![license-badge][]][license] &nbsp;
+[![build-badge][]][build]&nbsp;
+[![downloads-badge][]][crates-io]&nbsp;
+[![version-badge][]][crates-io]&nbsp;
+[![license-badge][]][license]&nbsp;
 
-[build]: https://travis-ci.org/felixc/rexiv2
-[build-badge]: https://img.shields.io/travis/felixc/rexiv2.svg
+[build]: https://dl.circleci.com/status-badge/redirect/gh/felixc/rexiv2/tree/main
+[build-badge]: https://dl.circleci.com/status-badge/img/gh/felixc/rexiv2/tree/main.svg?style=shield
 [crates-io]: https://crates.io/crates/rexiv2
 [downloads-badge]: https://img.shields.io/crates/d/rexiv2.svg
 [version-badge]: https://img.shields.io/crates/v/rexiv2.svg
