@@ -1,0 +1,21 @@
+.steps: &steps
+  - cargo build --verbose --all-features
+  - cargo test --verbose --all-features
+  - cargo run --example gps
+  - cargo run --example timestamp
+
+test:linux-msrv:
+  image: rust:1.40-slim
+  script:
+    - *steps
+
+test:linux-stable:
+  image: rust:slim
+  script:
+    - *steps
+
+test:linux-nightly:
+  image: rustlang/rust:nightly-slim
+  script:
+    - *steps
+  allow_failure: true
