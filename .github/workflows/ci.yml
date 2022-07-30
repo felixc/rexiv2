@@ -1,0 +1,56 @@
+name: Build and Test
+on: push
+permissions:
+  contents: read
+concurrency:
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+  cancel-in-progress: true
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        container_image: ["rust:1.40-slim", "rust:slim", "rustlang/rust:nightly-slim"]
+    container:
+      image: ${{ matrix.container_image }}
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+      - name: Install system dependencies
+        run: |
+          apt --quiet update
+          apt --yes install libgexiv2-dev
+      - name: Show environment info
+        run: |
+          rustc --version --verbose && echo ""
+          cargo --version --verbose && echo ""
+          dpkg --list libgexiv2-dev libexiv2-dev
+      - name: Build
+        run: cargo build --verbose --all-features
+      - name: Test
+        run: cargo test --verbose --all-features
+      - name: Run Examples
+        run: |
+          cargo run --example gps
+          cargo run --example timestamp
+  osx:
+    runs-on: macos-latest
+    steps:
+      - name: Check out source code
+        uses: actions/checkout@v3
+      - name: Install system dependencies
+        run: brew install gexiv2 pkg-config
+      - name: Install Rust and Cargo
+        run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+      - name: Show environment info
+        run: |
+          rustc --version --verbose && echo ""
+          cargo --version --verbose
+      - name: Build
+        run: cargo build --verbose --all-features
+      - name: Test
+        run: cargo test --verbose --all-features
+      - name: Run Examples
+        run: |
+          cargo run --example gps
+          cargo run --example timestamp

@@ -92,6 +92,7 @@ fn supports_xmp() {
 }
 
 #[test]
+#[ignore]
 fn supports_bmff() {
     setup_test();
     // iPhone devices use the HEIC (BMFF) file format which only works properly after gexiv2 has been initialized
