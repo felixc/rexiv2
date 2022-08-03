@@ -93,7 +93,7 @@ fn supports_bmff() {
     // after gexiv2 has been initialized (and the underlying libraries are the
     // right version gexiv2 v0.13.0/Exiv2 v0.27.4)
     if unsafe { gexiv2::gexiv2_get_version() } < 1300 {
-      return;
+        return;
     }
 
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.HEIC")).unwrap();

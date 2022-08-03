@@ -2,10 +2,9 @@ version: 2.1
 
 
 commands:
-  build_and_test_steps:
-    description: "Build the library and test it"
+  install_system_dependencies:
+    description: "Install system-level libraries/tools we depend on"
     steps:
-      - checkout
       - run:
           name: Install system dependencies
           command: |
@@ -19,6 +18,11 @@ commands:
                 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
                 ;;
             esac
+  build_and_test_steps:
+    description: "Build the library and test it"
+    steps:
+      - checkout
+      - install_system_dependencies
       - run:
           name: Show environment info
           command: |
@@ -50,29 +54,42 @@ linux_job_config: &linux_job_config
 
 
 jobs:
-  linux-msrv:
+  test-linux-msrv:
     docker:
       - image: rust:1.56-slim
     <<: *linux_job_config
-  linux-stable:
+  test-linux-stable:
     docker:
       - image: rust:slim
     <<: *linux_job_config
-  linux-nightly:
+  test-linux-nightly:
     docker:
       - image: rustlang/rust:nightly-slim
     <<: *linux_job_config
-  osx-stable:
+  test-osx-stable:
     macos:
       xcode: "14.0.0"
     steps:
       - build_and_test_steps
+  lint-and-format:
+    docker:
+      - image: rustlang/rust:nightly-slim
+    steps:
+      - checkout
+      - install_system_dependencies
+      - run:
+          name: Run linter
+          command: cargo +nightly clippy
+      - run:
+          name: Check formatting
+          command: cargo +nightly fmt --check
 
 
 workflows:
   build-and-test:
     jobs:
-      - linux-msrv
-      - linux-stable
-      - linux-nightly
-      - osx-stable
+      - test-linux-msrv
+      - test-linux-stable
+      - test-linux-nightly
+      - test-osx-stable
+      - lint-and-format

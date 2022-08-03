@@ -13,6 +13,8 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(clippy::needless_doctest_main)]
+
 //! This library provides a Rust wrapper around the [gexiv2][gexiv2] library,
 //! which is itself a GObject-based wrapper around the [Exiv2][exiv2] library,
 //! which provides read and write access to the Exif, XMP, and IPTC metadata
@@ -47,7 +49,7 @@ use std::str;
 use std::os::unix::ffi::OsStrExt;
 
 /// A wrapper type for the kinds of errors one might encounter when using the library.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub enum Rexiv2Error {
     /// No value found
     NoValue,
@@ -90,13 +92,13 @@ impl From<str::Utf8Error> for Rexiv2Error {
 pub type Result<T> = std::result::Result<T, Rexiv2Error>;
 
 /// An opaque structure that serves as a container for a media file's metadata.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct Metadata {
     raw: *mut gexiv2::GExiv2Metadata,
 }
 
 /// An opaque structure that serves as a container for a preview image.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct PreviewImage<'a> {
     raw: *mut gexiv2::GExiv2PreviewProperties,
     metadata: &'a Metadata, // Parent metadata to load a PreviewImage from a PreviewProperties.
@@ -111,7 +113,7 @@ pub struct GpsInfo {
 }
 
 /// The possible data types that a tag can have.
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum TagType {
     /// Exif BYTE type, 8-bit unsigned integer.
     UnsignedByte,
@@ -773,10 +775,7 @@ impl Metadata {
             let mut n = 0;
             while !(*ptr.offset(n)).is_null() {
                 let preview_prop = *ptr.offset(n);
-                previews.push(PreviewImage {
-                    raw: preview_prop,
-                    metadata: self,
-                });
+                previews.push(PreviewImage { raw: preview_prop, metadata: self });
                 n += 1;
             }
             Some(previews)
@@ -792,11 +791,7 @@ impl Metadata {
         let alt = &mut 0.0;
         match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
             0 => None,
-            _ => Some(GpsInfo {
-                longitude: *lon,
-                latitude: *lat,
-                altitude: *alt,
-            }),
+            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt }),
         }
     }
 
