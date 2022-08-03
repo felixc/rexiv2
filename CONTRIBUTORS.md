@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+SPDX-License-Identifier: CC0-1.0
+-->
+
 Project Maintainer
 ------------------
 * Felix Crux

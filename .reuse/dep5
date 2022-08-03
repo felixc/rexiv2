@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: rexiv2
+Upstream-Contact: Felix Crux <felixc@felixcrux.com>
+Source: https://github.com/felixc/rexiv2
+
+Files: examples/example.jpg tst/sample.*
+Copyright: Felix Crux <felixc@felixcrux.com> and CONTRIBUTORS
+License: CC0-1.0

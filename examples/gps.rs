@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// SPDX-License-Identifier: GPL-3.0-or-later
+
 extern crate rexiv2;
 
 use rexiv2::Metadata;

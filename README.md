@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 rexiv2
 ======
 
@@ -5,6 +10,7 @@ rexiv2
 [![downloads-badge][]][crates-io]&nbsp;
 [![version-badge][]][crates-io]&nbsp;
 [![license-badge][]][license]&nbsp;
+[![reuse-badge][]][reuse]&nbsp;
 
 [build]: https://dl.circleci.com/status-badge/redirect/gh/felixc/rexiv2/tree/main
 [build-badge]: https://dl.circleci.com/status-badge/img/gh/felixc/rexiv2/tree/main.svg?style=shield
@@ -13,6 +19,8 @@ rexiv2
 [version-badge]: https://img.shields.io/crates/v/rexiv2.svg
 [license]: https://github.com/felixc/rexiv2/blob/master/LICENSE
 [license-badge]: https://img.shields.io/crates/l/rexiv2.svg
+[reuse-badge]: https://api.reuse.software/badge/github.com/felixc/rexiv2
+[reuse]: https://api.reuse.software/info/github.com/felixc/rexiv2
 
 
 Rust library for working with media file metadata

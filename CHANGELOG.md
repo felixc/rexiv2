@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+SPDX-License-Identifier: CC0-1.0
+-->
+
 ## [NEXT] - Unreleased
   * Require Rust 1.56 as the minimum supported language version.
   * Adopt 2021 edition of the language.

@@ -1,5 +1,8 @@
 // Copyright © 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
 //
+// SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or

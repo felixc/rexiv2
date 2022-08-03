@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CONTRIBUTORS
+# SPDX-License-Identifier: CC0-1.0
+
+
 version: 2.1
 
 
@@ -72,6 +76,7 @@ jobs:
     steps:
       - build_and_test_steps
   lint-and-format:
+    resource_class: small
     docker:
       - image: rustlang/rust:nightly-slim
     steps:
@@ -83,6 +88,15 @@ jobs:
       - run:
           name: Check formatting
           command: cargo +nightly fmt --check
+  check-spdx:
+    resource_class: small
+    docker:
+      - image: fsfe/reuse:latest
+    steps:
+      - checkout
+      - run:
+          name: Check SPDX licensing metadata
+          command: reuse lint
 
 
 workflows:
@@ -93,3 +107,4 @@ workflows:
       - test-linux-nightly
       - test-osx-stable
       - lint-and-format
+      - check-spdx
