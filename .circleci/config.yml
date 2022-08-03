@@ -58,6 +58,11 @@ linux_job_config: &linux_job_config
 
 
 jobs:
+  test-osx-stable:
+    macos:
+      xcode: "14.0.0"
+    steps:
+      - build_and_test_steps
   test-linux-msrv:
     docker:
       - image: rust:1.56-slim
@@ -66,16 +71,41 @@ jobs:
     docker:
       - image: rust:slim
     <<: *linux_job_config
-  test-linux-nightly:
+  test-linux-nightly-with-coverage:
+    resource_class: large
     docker:
       - image: rustlang/rust:nightly-slim
-    <<: *linux_job_config
-  test-osx-stable:
-    macos:
-      xcode: "14.0.0"
     steps:
-      - build_and_test_steps
-  lint-and-format:
+      - checkout
+      - install_system_dependencies
+      - run:
+          name: Install test coverage reporting dependencies
+          command: |
+            rustup component add llvm-tools-preview
+            cargo install grcov
+            apt install --yes curl gpg git
+            curl https://keybase.io/codecovsecurity/pgp_keys.asc \
+                | gpg --no-default-keyring --keyring keys.gpg --import
+            curl -Os https://uploader.codecov.io/latest/linux/codecov
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+            curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+            gpg --keyring keys.gpg --verify codecov.SHA256SUM.sig codecov.SHA256SUM
+            sha256sum --check codecov.SHA256SUM
+            chmod +x codecov
+      - run:
+          name: Run tests with coverage analysis
+          command: |
+            RUSTFLAGS="-C instrument-coverage" \
+            RUSTDOCFLAGS="-C instrument-coverage -Z unstable-options --persist-doctests target/debug/doctestbins" \
+            LLVM_PROFILE_FILE="coverage-%p-%m.profraw" \
+            cargo test --all-features
+      - run:
+          name: Upload coverage report to Codecov
+          command: |
+            grcov . --binary-path ./target/debug/ -t lcov --branch \
+                --keep-only '/root/project/src/*' -o ./lcov.info
+            ./codecov -Z
+  check-lint-and-format:
     resource_class: small
     docker:
       - image: rustlang/rust:nightly-slim
@@ -102,9 +132,9 @@ jobs:
 workflows:
   build-and-test:
     jobs:
+      - test-osx-stable
       - test-linux-msrv
       - test-linux-stable
-      - test-linux-nightly
-      - test-osx-stable
-      - lint-and-format
+      - test-linux-nightly-with-coverage
+      - check-lint-and-format
       - check-spdx
