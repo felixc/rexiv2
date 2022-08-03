@@ -54,6 +54,26 @@ to get going, that may be the place to start.
 [g-f-b]: https://github.com/felixc/rexiv2/issues?q=is%3Aissue+is%3Aopen+label%3Agood-first-bug
 
 
+Code Conventions and Expectations
+---------------------------------
+
+Code should be automatically formatted with `rustfmt`.
+
+For the moment we have to to use the nightly version of Cargo/rustfmt, because
+we really want to preserve multiple newlines between sections of code, and that
+requires the `blank_lines_upper_bound` configuration option in `.rustfmt.toml`.
+See https://github.com/rust-lang/rustfmt/issues/3381 for the bug tracking the
+stabilization of this configuration option.
+
+This means you can run the auto-formatter with `cargo +nightly fmt`.
+
+Code should be checked/linted with `clippy`. You can run this manually with
+`cargo clippy --all-targets --all-features`.
+
+Code should generally come with accompanying tests, but it’s understood
+that it’s not always possible to reach 100% line/branch coverage.
+
+
 Setting Up Your Development Environment
 ---------------------------------------
 
@@ -69,12 +89,14 @@ If you encounter issues with one of these versions, or would like to test to
 ensure your changes are compatible with them, you’ll need a way to easily switch
 between Rust releases. The best tool for this is [rustup][rustup].
 
-After installation, you can switch versions by running commands like `rustup
-update beta && rustup default beta` (substituting the version you want in place
-of `beta`). Remember to switch back after you’re done!
+After installation, you can run your usual Cargo commands with a flag specifying
+which toolchain you’d like to use — for example, `cargo +nightly test`.
+
+Alternatively, you can switch default versions by running commands like `rustup
+update nightly && rustup default nightly` (substituting the version you want in
+place of `nightly`). Remember to switch back after you’re done!
 
 [rustup]: https://rustup.rs/
-
 
 
 Copyright & Licensing of Contributions

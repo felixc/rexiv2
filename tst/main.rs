@@ -71,21 +71,21 @@ fn new_from_buffer_error() {
 fn supports_exif() {
     test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
-    assert_eq!(meta.supports_exif(), true);
+    assert!(meta.supports_exif());
 }
 
 #[test]
 fn supports_iptc() {
     test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
-    assert_eq!(meta.supports_iptc(), true);
+    assert!(meta.supports_iptc());
 }
 
 #[test]
 fn supports_xmp() {
     test_setup();
     let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
-    assert_eq!(meta.supports_xmp(), true);
+    assert!(meta.supports_xmp());
 }
 
 #[test]
@@ -108,9 +108,9 @@ fn supports_bmff() {
 
     // This seems strange since we can read the above information
     // We may be missing a "supports" function for bmff tags, or the functions may be returning incorrectly
-    assert_eq!(meta.supports_exif(), false);
-    assert_eq!(meta.supports_iptc(), false);
-    assert_eq!(meta.supports_xmp(), false);
+    assert!(!meta.supports_exif());
+    assert!(!meta.supports_iptc());
+    assert!(!meta.supports_xmp());
 }
 
 #[test]

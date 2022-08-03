@@ -84,7 +84,7 @@ jobs:
       - install_system_dependencies
       - run:
           name: Run linter
-          command: cargo +nightly clippy
+          command: cargo +nightly clippy --all-targets --all-features -- -D warnings
       - run:
           name: Check formatting
           command: cargo +nightly fmt --check
