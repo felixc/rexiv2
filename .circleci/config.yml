@@ -43,7 +43,7 @@ commands:
           command: cargo build --verbose --all-features
       - run:
           name: Test
-          command: cargo test --verbose --all-features
+          command: cargo test --verbose --all-features -- --test-threads 2
       - run:
           name: Run Examples
           command: |

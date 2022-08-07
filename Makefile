@@ -30,6 +30,7 @@ test:  ## Run all tests, including doctests
 	cargo test --all-features
 
 coverage:  ## Produce a test coverage report
+	cargo clean
 	RUSTDOCFLAGS="-C instrument-coverage -Z unstable-options --persist-doctests target/debug/doctestbins" \
 		RUSTFLAGS="-C instrument-coverage" \
 		LLVM_PROFILE_FILE="target/coverage/%p-%m.profraw" \
@@ -37,9 +38,17 @@ coverage:  ## Produce a test coverage report
 	grcov ./target/coverage --binary-path ./target/debug/ --source-dir . \
 		--ignore-not-existing --ignore "*examples*" --branch \
 		--output-type html --output-path ./target/coverage/html/
-	open ./target/coverage/html/index.html
+	@printf "\nCoverage report available at: file:///$$(pwd)/target/coverage/html/index.html\n"
+
+doc:  ## Generate documentation
+	cargo clean
+	cargo doc --no-deps --all-features
+	@printf "\nDocs available at: file:///$$(pwd)/target/doc/rexiv2/index.html\n"
 
   ##
+
+clean:  ## Remove all build artefacts
+	cargo clean
 
 release:  ## Run checks before releasing a new version
 	rustup update
@@ -52,4 +61,4 @@ release:  ## Run checks before releasing a new version
 	cargo audit
 
 
-.PHONY: help setup format check test coverage release
+.PHONY: help setup format check test coverage doc clean release

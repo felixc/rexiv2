@@ -9,6 +9,9 @@ Contributing
 Contributions are gladly accepted, either through GitHub pull requests or by
 mailing patches to `felixc@felixcrux.com` (PGP key [8569B6311EE485F8][pgp-key]).
 
+Reports of security issues can also be sent privately to the email address and
+PGP key given above.
+
 **By contributing, you are agreeing to make your contribution available under
 the same license terms as the rest of the project.**
 

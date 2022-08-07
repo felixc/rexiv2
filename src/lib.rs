@@ -170,12 +170,6 @@ pub enum TagType {
     Unknown,
 }
 
-impl Default for TagType {
-    fn default() -> TagType {
-        TagType::Unknown
-    }
-}
-
 /// The media types that an image might have.
 ///
 /// This can be easily converted to/created from an Internet Media Type string with the `::from()`
@@ -375,6 +369,16 @@ impl Metadata {
     ///
     /// Note that this may be different from the values reported by some metadata tags
     /// that take into account the intended orientation of the image.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_pixel_width(), 1);
+    /// ```
     pub fn get_pixel_width(&self) -> i32 {
         unsafe { gexiv2::gexiv2_metadata_get_pixel_width(self.raw) }
     }
@@ -383,6 +387,16 @@ impl Metadata {
     ///
     /// Note that this may be different from the values reported by some metadata tags
     /// that take into account the intended orientation of the image.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_pixel_height(), 1);
+    /// ```
     pub fn get_pixel_height(&self) -> i32 {
         unsafe { gexiv2::gexiv2_metadata_get_pixel_height(self.raw) }
     }
@@ -391,33 +405,104 @@ impl Metadata {
     // Tag management.
 
     /// Indicates whether the given tag is present/populated in the loaded metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert!(!meta.has_tag("Exif.Image.DateTime"));
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_tag("Exif.Image.DateTime"));
     pub fn has_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag.as_ptr()) == 1 }
     }
 
     /// Removes the tag from the metadata if it exists. Returns whether it was there originally.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_tag("Exif.Image.DateTime"));
+    /// assert!(meta.clear_tag("Exif.Image.DateTime"));
+    /// assert!(!meta.has_tag("Exif.Image.DateTime"));
     pub fn clear_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag.as_ptr()) == 1 }
     }
 
     /// Remove all tag values from the metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_tag("Exif.Image.DateTime"));
+    /// meta.clear();
+    /// assert!(!meta.has_tag("Exif.Image.DateTime"));
     pub fn clear(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear(self.raw) }
     }
 
     /// Indicates whether the loaded file contains any Exif metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert!(!meta.has_exif());
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_exif());
     pub fn has_exif(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_exif(self.raw) == 1 }
     }
 
-    /// Removes all Exif metadata.
+    /// Removes all Exif metadata, leaving other types of metadata intact.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// meta.set_tag_string("Xmp.dc.Title", "Test");
+    /// assert!(meta.has_exif());
+    /// assert!(meta.has_xmp());
+    /// meta.clear_exif();
+    /// assert!(!meta.has_exif());
+    /// assert!(meta.has_xmp());
     pub fn clear_exif(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_exif(self.raw) }
     }
 
     /// List all Exif tags present in the loaded metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert_eq!(meta.get_exif_tags(), Ok(vec!["Exif.Image.DateTime".to_string()]));
     pub fn get_exif_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -440,16 +525,52 @@ impl Metadata {
     }
 
     /// Indicates whether the loaded file contains any XMP metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert!(!meta.has_xmp());
+    /// meta.set_tag_string("Xmp.dc.Title", "Test Image");
+    /// assert!(meta.has_xmp());
     pub fn has_xmp(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_xmp(self.raw) == 1 }
     }
 
-    /// Removes all XMP metadata.
+    /// Removes all XMP metadata, leaving all other types of metadata intact.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Xmp.dc.Title", "Test Image");
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_xmp());
+    /// assert!(meta.has_exif());
+    /// meta.clear_xmp();
+    /// assert!(!meta.has_xmp());
+    /// assert!(meta.has_exif());
     pub fn clear_xmp(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_xmp(self.raw) }
     }
 
     /// List all XMP tags present in the loaded metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Xmp.dc.Title", "Test Image");
+    /// assert_eq!(meta.get_xmp_tags(), Ok(vec!["Xmp.dc.Title".to_string()]));
     pub fn get_xmp_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -472,16 +593,52 @@ impl Metadata {
     }
 
     /// Indicates whether the loaded file contains any IPTC metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert!(!meta.has_iptc());
+    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// assert!(meta.has_iptc());
     pub fn has_iptc(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_iptc(self.raw) == 1 }
     }
 
-    /// Removes all XMP metadata.
+    /// Removes all XMP metadata, leaving all other types of metadata intact.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// assert!(meta.has_iptc());
+    /// assert!(meta.has_exif());
+    /// meta.clear_iptc();
+    /// assert!(!meta.has_iptc());
+    /// assert!(meta.has_exif());
     pub fn clear_iptc(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_iptc(self.raw) }
     }
 
     /// List all IPTC tags present in the loaded metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// assert_eq!(meta.get_iptc_tags(), Ok(vec!["Iptc.Application2.Subject".to_string()]));
     pub fn get_iptc_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -506,6 +663,16 @@ impl Metadata {
     /// Get the value of a tag as a string.
     ///
     /// Only safe if the tag is really of a string type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// assert_eq!(meta.get_tag_string("Iptc.Application2.Subject"), Ok("Test Image".to_string()));
     pub fn get_tag_string(&self, tag: &str) -> Result<String> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -522,6 +689,15 @@ impl Metadata {
     /// Set the value of a tag to the given string.
     ///
     /// Only safe if the tag is really of a string type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
@@ -599,6 +775,16 @@ impl Metadata {
     /// Get the value of a tag as a number.
     ///
     /// Only safe if the tag is really of a numeric type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
+    /// assert_eq!(meta.get_tag_numeric("Exif.Photo.MaxApertureValue"), 5);
     pub fn get_tag_numeric(&self, tag: &str) -> i32 {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) as i32 }
@@ -607,6 +793,16 @@ impl Metadata {
     /// Set the value of a tag to the given number.
     ///
     /// Only safe if the tag is really of a numeric type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
+    /// assert_eq!(meta.get_tag_numeric("Exif.Photo.MaxApertureValue"), 5);
     pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -621,6 +817,17 @@ impl Metadata {
     /// Get the value of a tag as a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// let ratio = num_rational::Ratio::new_raw(16, 10);
+    /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &ratio);
+    /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
     pub fn get_tag_rational(&self, tag: &str) -> Option<num_rational::Ratio<i32>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
@@ -636,6 +843,17 @@ impl Metadata {
     /// Set the value of a tag to a Rational.
     ///
     /// Only safe if the tag is in fact of a rational type.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// let ratio = num_rational::Ratio::new_raw(16, 10);
+    /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &ratio);
+    /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
     pub fn set_tag_rational(&self, tag: &str, value: &num_rational::Ratio<i32>) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -649,6 +867,16 @@ impl Metadata {
     }
 
     /// Get the value of a tag as raw data.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &num_rational::Ratio::new_raw(16, 10));
+    /// assert_eq!(meta.get_tag_raw("Exif.Photo.MaxApertureValue"), Ok(vec![0, 0, 0, 16, 0, 0, 0, 10]));
     #[cfg(feature = "raw-tag-access")]
     pub fn get_tag_raw(&self, tag: &str) -> Result<Vec<u8>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
@@ -671,11 +899,31 @@ impl Metadata {
     // Helper & convenience getters/setters.
 
     /// Find out the orientation the image should have, according to the metadata tag.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::Unspecified);
     pub fn get_orientation(&self) -> Orientation {
         unsafe { gexiv2::gexiv2_metadata_get_orientation(self.raw) }
     }
 
     /// Set the intended orientation for the image.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::Unspecified);
+    /// meta.set_orientation(rexiv2::Orientation::VerticalFlip);
+    /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::VerticalFlip);
     pub fn set_orientation(&self, orientation: Orientation) {
         unsafe { gexiv2::gexiv2_metadata_set_orientation(self.raw, orientation) }
     }
@@ -905,8 +1153,8 @@ impl PreviewImage<'_> {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::is_exif_tag("Exif.Photo.FocalLength"), true);
-/// assert_eq!(rexiv2::is_exif_tag("Iptc.Application2.Subject"), false);
+/// assert!(rexiv2::is_exif_tag("Exif.Photo.FocalLength"));
+/// assert!(!rexiv2::is_exif_tag("Iptc.Application2.Subject"));
 /// ```
 pub fn is_exif_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap();
@@ -917,8 +1165,8 @@ pub fn is_exif_tag(tag: &str) -> bool {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::is_iptc_tag("Iptc.Application2.Subject"), true);
-/// assert_eq!(rexiv2::is_iptc_tag("Xmp.dc.Title"), false);
+/// assert!(rexiv2::is_iptc_tag("Iptc.Application2.Subject"));
+/// assert!(!rexiv2::is_iptc_tag("Xmp.dc.Title"));
 /// ```
 pub fn is_iptc_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap();
@@ -929,8 +1177,8 @@ pub fn is_iptc_tag(tag: &str) -> bool {
 ///
 /// # Examples
 /// ```
-/// assert_eq!(rexiv2::is_xmp_tag("Xmp.dc.Title"), true);
-/// assert_eq!(rexiv2::is_xmp_tag("Exif.Photo.FocalLength"), false);
+/// assert!(rexiv2::is_xmp_tag("Xmp.dc.Title"));
+/// assert!(!rexiv2::is_xmp_tag("Exif.Photo.FocalLength"));
 /// ```
 pub fn is_xmp_tag(tag: &str) -> bool {
     let c_str_tag = ffi::CString::new(tag).unwrap();
@@ -1031,7 +1279,7 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
 ///
 /// # See also
 ///
-/// Associated Gexiv2 source code: https://gitlab.gnome.org/GNOME/gexiv2/-/blob/e4d65b31cd77f28ef248117e161de9d8cc31d712/gexiv2/gexiv2-startup.cpp#L14
+/// Associated Gexiv2 source code: <https://gitlab.gnome.org/GNOME/gexiv2/-/blob/e4d65b31cd77f28ef248117e161de9d8cc31d712/gexiv2/gexiv2-startup.cpp#L14>
 ///
 /// # Examples
 ///
@@ -1048,10 +1296,10 @@ pub fn get_tag_type(tag: &str) -> Result<TagType> {
 /// might want to ensure the function only gets set up once:
 ///
 /// ```
-/// use std::sync::{Once, ONCE_INIT};
+/// use std::sync::Once;
 ///
 /// fn main() {
-///     static START: Once = ONCE_INIT;
+///     static START: Once = Once::new();
 ///
 ///     START.call_once(|| unsafe {
 ///         rexiv2::initialize().expect("Unable to initialize rexiv2");
@@ -1120,6 +1368,7 @@ pub fn unregister_all_xmp_namespaces() {
     unsafe { gexiv2::gexiv2_metadata_unregister_all_xmp_namespaces() }
 }
 
+
 // Logging
 
 /// Get the GExiv2 log level.
@@ -1145,6 +1394,7 @@ pub fn get_log_level() -> LogLevel {
 pub fn set_log_level(level: LogLevel) {
     unsafe { gexiv2::gexiv2_log_set_level(level) }
 }
+
 
 // Private internal helpers.
 

@@ -16,3 +16,4 @@ Contributors
 * Wieland Hoffmann
 * Jean-Baptiste Daval
 * Riley Trautman
+* Sean Dawson
