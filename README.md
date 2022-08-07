@@ -6,17 +6,21 @@ SPDX-License-Identifier: GPL-3.0-or-later
 rexiv2
 ======
 
+[![docs-badge][]][docs]&nbsp;
 [![build-badge][]][build]&nbsp;
 [![coverage-badge][]][coverage]&nbsp;
 [![downloads-badge][]][crates-io]&nbsp;
 [![version-badge][]][crates-io]&nbsp;
 [![license-badge][]][license]&nbsp;
 [![reuse-badge][]][reuse]&nbsp;
+[![best-practices-badge][]][best-practices]&nbsp;
 
+[docs]: https://felixcrux.com/files/doc/rexiv2/
+[docs-badge]: https://img.shields.io/docsrs/rexiv2
 [build]: https://dl.circleci.com/status-badge/redirect/gh/felixc/rexiv2/tree/main
 [build-badge]: https://dl.circleci.com/status-badge/img/gh/felixc/rexiv2/tree/main.svg?style=shield
 [coverage]: https://codecov.io/gh/felixc/rexiv2
-[coverage-badge]: https://codecov.io/gh/felixc/rexiv2/branch/master/graph/badge.svg?token=FT6WmJ9pD1
+[coverage-badge]: https://codecov.io/gh/felixc/rexiv2/branch/main/graph/badge.svg?token=FT6WmJ9pD1
 [crates-io]: https://crates.io/crates/rexiv2
 [downloads-badge]: https://img.shields.io/crates/d/rexiv2.svg
 [version-badge]: https://img.shields.io/crates/v/rexiv2.svg
@@ -24,6 +28,8 @@ rexiv2
 [license-badge]: https://img.shields.io/crates/l/rexiv2.svg
 [reuse]: https://api.reuse.software/info/github.com/felixc/rexiv2
 [reuse-badge]: https://api.reuse.software/badge/github.com/felixc/rexiv2
+[best-practices]: https://bestpractices.coreinfrastructure.org/projects/6330
+[best-practices-badge]: https://bestpractices.coreinfrastructure.org/projects/6330/badge
 
 
 Rust library for working with media file metadata

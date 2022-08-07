@@ -54,6 +54,22 @@ to get going, that may be the place to start.
 [g-f-b]: https://github.com/felixc/rexiv2/issues?q=is%3Aissue+is%3Aopen+label%3Agood-first-bug
 
 
+Setting Up Your Development Environment
+---------------------------------------
+
+You’ll first need to be able to run the code. For instructions on getting the
+requisite system library dependencies, consult the [`SETUP`](SETUP.md) file.
+
+You can get by doing basic development with just the stable Rust and Cargo
+toolchain, and nothing else. However, if you want to run more complex workflows
+like generating test coverage reports or getting a Clippy static analysis/lint
+check, you can install the prerequisites with `make setup`.
+
+The `Makefile` in the project root defines a few useful commands for common
+needs, like `make test`, `make format`, and `make check`. For a full list of
+available commands, run `make help`.
+
+
 Code Conventions and Expectations
 ---------------------------------
 
@@ -72,31 +88,6 @@ Code should be checked/linted with `clippy`. You can run this manually with
 
 Code should generally come with accompanying tests, but it’s understood
 that it’s not always possible to reach 100% line/branch coverage.
-
-
-Setting Up Your Development Environment
----------------------------------------
-
-To get started on making a code contribution, you’ll first need to set up your
-development environment. For instructions, consult the [`SETUP`](SETUP.md) file.
-
-### Advanced: Non-Stable Rust
-The code for this project is primarily meant to be used with the current Stable
-version of Rust. However, we do want to try to keep it functional under Beta,
-Nightly, and some older releases — on a best-effort basis.
-
-If you encounter issues with one of these versions, or would like to test to
-ensure your changes are compatible with them, you’ll need a way to easily switch
-between Rust releases. The best tool for this is [rustup][rustup].
-
-After installation, you can run your usual Cargo commands with a flag specifying
-which toolchain you’d like to use — for example, `cargo +nightly test`.
-
-Alternatively, you can switch default versions by running commands like `rustup
-update nightly && rustup default nightly` (substituting the version you want in
-place of `nightly`). Remember to switch back after you’re done!
-
-[rustup]: https://rustup.rs/
 
 
 Copyright & Licensing of Contributions
