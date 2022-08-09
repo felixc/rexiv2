@@ -26,11 +26,11 @@ format:  ## Run auto-formatter
 check:  ## Run linter/analysis tool
 	cargo clippy --all-targets --all-features -- -D warnings
 
-test:  ## Run all tests, including doctests
-	cargo test --all-features
+test:  ## Run all tests (or specify a test name/selector to run just that)
+	cargo test --all-features -- $(filter-out $@, $(MAKECMDGOALS))
 
 coverage:  ## Produce a test coverage report
-	cargo clean
+	cargo +nightly clean
 	RUSTDOCFLAGS="-C instrument-coverage -Z unstable-options --persist-doctests target/debug/doctestbins" \
 		RUSTFLAGS="-C instrument-coverage" \
 		LLVM_PROFILE_FILE="target/coverage/%p-%m.profraw" \

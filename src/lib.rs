@@ -31,8 +31,9 @@
 //! ```no_run
 //! let file = "myimage.jpg";
 //! let tag = "Iptc.Application2.Keywords";
-//! let meta = rexiv2::Metadata::new_from_path(&file).unwrap();
+//! let meta = rexiv2::Metadata::new_from_path(&file)?;
 //! println!("{:?}", meta.get_tag_multiple_strings(tag));
+//! # Ok::<(), Box<dyn std::error::Error>>(())
 //! ```
 //!
 //! [gexiv2]:      https://wiki.gnome.org/Projects/gexiv2
@@ -270,8 +271,9 @@ impl Metadata {
     /// # Examples
     /// ```no_run
     /// let path = "myphoto.jpg";
-    /// let meta = rexiv2::Metadata::new_from_path(&path).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Jpeg);
+    /// let meta = rexiv2::Metadata::new_from_path(&path)?;
+    /// assert_eq!(meta.get_media_type()?, rexiv2::MediaType::Jpeg);
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
     /// ```
     pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -297,8 +299,9 @@ impl Metadata {
     ///                0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65, 84,
     ///                8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73, 69,
     ///                78, 68, 174, 66, 96, 130];
-    /// let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// assert_eq!(meta.get_media_type().unwrap(), rexiv2::MediaType::Png);
+    /// let meta = rexiv2::Metadata::new_from_buffer(&minipng)?;
+    /// assert_eq!(meta.get_media_type()?, rexiv2::MediaType::Png);
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
     /// ```
     pub fn new_from_buffer(data: &[u8]) -> Result<Metadata> {
         let mut err: *mut gexiv2::GError = ptr::null_mut();
@@ -416,6 +419,7 @@ impl Metadata {
     /// assert!(!meta.has_tag("Exif.Image.DateTime"));
     /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
     /// assert!(meta.has_tag("Exif.Image.DateTime"));
+    /// ```
     pub fn has_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_has_tag(self.raw, c_str_tag.as_ptr()) == 1 }
@@ -430,10 +434,11 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// # meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
     /// assert!(meta.has_tag("Exif.Image.DateTime"));
     /// assert!(meta.clear_tag("Exif.Image.DateTime"));
     /// assert!(!meta.has_tag("Exif.Image.DateTime"));
+    /// ```
     pub fn clear_tag(&self, tag: &str) -> bool {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_clear_tag(self.raw, c_str_tag.as_ptr()) == 1 }
@@ -448,10 +453,11 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// # meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
     /// assert!(meta.has_tag("Exif.Image.DateTime"));
     /// meta.clear();
     /// assert!(!meta.has_tag("Exif.Image.DateTime"));
+    /// ```
     pub fn clear(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear(self.raw) }
     }
@@ -468,6 +474,7 @@ impl Metadata {
     /// assert!(!meta.has_exif());
     /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
     /// assert!(meta.has_exif());
+    /// ```
     pub fn has_exif(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_exif(self.raw) == 1 }
     }
@@ -488,6 +495,7 @@ impl Metadata {
     /// meta.clear_exif();
     /// assert!(!meta.has_exif());
     /// assert!(meta.has_xmp());
+    /// ```
     pub fn clear_exif(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_exif(self.raw) }
     }
@@ -501,8 +509,9 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
+    /// # meta.set_tag_string("Exif.Image.DateTime", "2022-08-07 11:19:44");
     /// assert_eq!(meta.get_exif_tags(), Ok(vec!["Exif.Image.DateTime".to_string()]));
+    /// ```
     pub fn get_exif_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -536,6 +545,7 @@ impl Metadata {
     /// assert!(!meta.has_xmp());
     /// meta.set_tag_string("Xmp.dc.Title", "Test Image");
     /// assert!(meta.has_xmp());
+    /// ```
     pub fn has_xmp(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_xmp(self.raw) == 1 }
     }
@@ -556,6 +566,7 @@ impl Metadata {
     /// meta.clear_xmp();
     /// assert!(!meta.has_xmp());
     /// assert!(meta.has_exif());
+    /// ```
     pub fn clear_xmp(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_xmp(self.raw) }
     }
@@ -571,6 +582,7 @@ impl Metadata {
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// meta.set_tag_string("Xmp.dc.Title", "Test Image");
     /// assert_eq!(meta.get_xmp_tags(), Ok(vec!["Xmp.dc.Title".to_string()]));
+    /// ```
     pub fn get_xmp_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -604,6 +616,7 @@ impl Metadata {
     /// assert!(!meta.has_iptc());
     /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
     /// assert!(meta.has_iptc());
+    /// ```
     pub fn has_iptc(&self) -> bool {
         unsafe { gexiv2::gexiv2_metadata_has_iptc(self.raw) == 1 }
     }
@@ -624,6 +637,7 @@ impl Metadata {
     /// meta.clear_iptc();
     /// assert!(!meta.has_iptc());
     /// assert!(meta.has_exif());
+    /// ```
     pub fn clear_iptc(&self) {
         unsafe { gexiv2::gexiv2_metadata_clear_iptc(self.raw) }
     }
@@ -639,6 +653,7 @@ impl Metadata {
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
     /// assert_eq!(meta.get_iptc_tags(), Ok(vec!["Iptc.Application2.Subject".to_string()]));
+    /// ```
     pub fn get_iptc_tags(&self) -> Result<Vec<String>> {
         let mut tags = vec![];
         unsafe {
@@ -671,8 +686,9 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// # meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
     /// assert_eq!(meta.get_tag_string("Iptc.Application2.Subject"), Ok("Test Image".to_string()));
+    /// ```
     pub fn get_tag_string(&self, tag: &str) -> Result<String> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -698,6 +714,8 @@ impl Metadata {
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// meta.set_tag_string("Iptc.Application2.Subject", "Test Image");
+    /// assert_eq!(meta.get_tag_string("Iptc.Application2.Subject"), Ok("Test Image".to_string()));
+    /// ```
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let c_str_val = ffi::CString::new(value).unwrap();
@@ -783,8 +801,9 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
+    /// # meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
     /// assert_eq!(meta.get_tag_numeric("Exif.Photo.MaxApertureValue"), 5);
+    /// ```
     pub fn get_tag_numeric(&self, tag: &str) -> i32 {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe { gexiv2::gexiv2_metadata_get_tag_long(self.raw, c_str_tag.as_ptr()) as i32 }
@@ -801,8 +820,9 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
+    /// # meta.set_tag_numeric("Exif.Photo.MaxApertureValue", 5);
     /// assert_eq!(meta.get_tag_numeric("Exif.Photo.MaxApertureValue"), 5);
+    /// ```
     pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -826,8 +846,9 @@ impl Metadata {
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// let ratio = num_rational::Ratio::new_raw(16, 10);
-    /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &ratio);
+    /// # meta.set_tag_rational("Exif.Photo.MaxApertureValue", &ratio);
     /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
+    /// ```
     pub fn get_tag_rational(&self, tag: &str) -> Option<num_rational::Ratio<i32>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         let num = &mut 0;
@@ -854,6 +875,7 @@ impl Metadata {
     /// let ratio = num_rational::Ratio::new_raw(16, 10);
     /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &ratio);
     /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
+    /// ```
     pub fn set_tag_rational(&self, tag: &str, value: &num_rational::Ratio<i32>) -> Result<()> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
         unsafe {
@@ -875,8 +897,9 @@ impl Metadata {
     /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
-    /// meta.set_tag_rational("Exif.Photo.MaxApertureValue", &num_rational::Ratio::new_raw(16, 10));
+    /// # meta.set_tag_rational("Exif.Photo.MaxApertureValue", &num_rational::Ratio::new_raw(16, 10));
     /// assert_eq!(meta.get_tag_raw("Exif.Photo.MaxApertureValue"), Ok(vec![0, 0, 0, 16, 0, 0, 0, 10]));
+    /// ```
     #[cfg(feature = "raw-tag-access")]
     pub fn get_tag_raw(&self, tag: &str) -> Result<Vec<u8>> {
         let c_str_tag = ffi::CString::new(tag).unwrap();
@@ -908,6 +931,7 @@ impl Metadata {
     /// #               69, 78, 68, 174, 66, 96, 130];
     /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
     /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::Unspecified);
+    /// ```
     pub fn get_orientation(&self) -> Orientation {
         unsafe { gexiv2::gexiv2_metadata_get_orientation(self.raw) }
     }
@@ -924,11 +948,23 @@ impl Metadata {
     /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::Unspecified);
     /// meta.set_orientation(rexiv2::Orientation::VerticalFlip);
     /// assert_eq!(meta.get_orientation(), rexiv2::Orientation::VerticalFlip);
+    /// ```
     pub fn set_orientation(&self, orientation: Orientation) {
         unsafe { gexiv2::gexiv2_metadata_set_orientation(self.raw, orientation) }
     }
 
     /// Returns the camera exposure time of the photograph.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// # meta.set_tag_rational("Exif.Photo.ExposureTime", &num_rational::Ratio::new_raw(1, 1000));
+    /// assert_eq!(meta.get_exposure_time(), Some(num_rational::Ratio::new_raw(1, 1000)));
+    /// ```
     pub fn get_exposure_time(&self) -> Option<num_rational::Ratio<i32>> {
         let num = &mut 0;
         let den = &mut 0;
@@ -955,6 +991,17 @@ impl Metadata {
     }
 
     /// Returns the ISO speed used by the camera taking the photograph.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// # meta.set_tag_numeric("Exif.Photo.ISOSpeedRatings", 600);
+    /// assert_eq!(meta.get_iso_speed(), Some(600));
+    /// ```
     pub fn get_iso_speed(&self) -> Option<i32> {
         match unsafe { gexiv2::gexiv2_metadata_get_iso_speed(self.raw) } {
             0 => None,
