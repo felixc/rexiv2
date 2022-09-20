@@ -50,8 +50,6 @@ use std::ffi;
 use std::ptr;
 use std::str;
 
-use std::os::unix::ffi::OsStrExt;
-
 /// A wrapper type for the kinds of errors one might encounter when using the library.
 #[derive(Debug, PartialEq, Eq)]
 pub enum Rexiv2Error {
@@ -276,8 +274,9 @@ impl Metadata {
     /// # Ok::<(), Box<dyn std::error::Error>>(())
     /// ```
     pub fn new_from_path<S: AsRef<ffi::OsStr>>(path: S) -> Result<Metadata> {
+        let c_str_path = os_str_to_c_string(path)?;
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
+
         unsafe {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
@@ -348,8 +347,9 @@ impl Metadata {
 
     /// Save metadata to the file found at the given path, which must already exist.
     pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
+        let c_str_path = os_str_to_c_string(path)?;
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
+
         unsafe {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
@@ -1053,8 +1053,9 @@ impl Metadata {
 
     /// Set or replace the EXIF thumbnail with the image in the file.
     pub fn set_thumbnail_from_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
+        let c_str_path = os_str_to_c_string(path)?;
         let mut err: *mut gexiv2::GError = ptr::null_mut();
-        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
+
         unsafe {
             let ok = gexiv2::gexiv2_metadata_set_exif_thumbnail_from_file(
                 self.raw,
@@ -1198,10 +1199,10 @@ impl PreviewImage<'_> {
 
     /// Save the preview image to a file.
     pub fn save_to_file<S: AsRef<ffi::OsStr>>(&self, path: S) -> Result<()> {
+        let c_str_path = os_str_to_c_string(path)?;
         let image =
             unsafe { gexiv2::gexiv2_metadata_get_preview_image(self.metadata.raw, self.raw) };
 
-        let c_str_path = ffi::CString::new(path.as_ref().as_bytes()).unwrap();
         unsafe {
             let ok = gexiv2::gexiv2_preview_image_write_file(image, c_str_path.as_ptr());
             gexiv2::gexiv2_preview_image_free(image);
@@ -1486,4 +1487,22 @@ fn int_bool_to_result(success: libc::c_int) -> Result<()> {
         0 => Err(Rexiv2Error::Internal(None)),
         _ => Ok(()),
     }
+}
+
+/// Convert an OS string to a UTF-8 CString
+fn os_str_to_c_string<S: AsRef<ffi::OsStr>>(path: S) -> Result<ffi::CString> {
+    let path_as_utf8_result = path.as_ref().to_str();
+    if path_as_utf8_result.is_none() {
+        return Err(Rexiv2Error::Internal(Some(
+            "Could not convert path to UTF-8".to_string(),
+        )));
+    }
+
+    if let Ok(path_as_c_string) = ffi::CString::new(path_as_utf8_result.unwrap().as_bytes()) {
+        return Ok(path_as_c_string);
+    }
+
+    Err(Rexiv2Error::Internal(Some(
+        "Could not construct CString from UTF-8 path".to_string(),
+    )))
 }

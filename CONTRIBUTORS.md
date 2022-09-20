@@ -18,3 +18,4 @@ Contributors
 * Riley Trautman
 * Sean Dawson
 * Hubert Figuière
+* Tobias Prisching
