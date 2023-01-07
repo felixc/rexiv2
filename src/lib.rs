@@ -291,6 +291,29 @@ impl Metadata {
         }
     }
 
+    /// Load the metadata from the given Exif data buffer.
+    ///
+    /// This is usually the data in the JPEG APP1 segment.
+    pub fn new_from_app1_segment(data: &[u8]) -> Result<Metadata> {
+        let mut err: *mut gexiv2::GError = ptr::null_mut();
+        unsafe {
+            let metadata = gexiv2::gexiv2_metadata_new();
+            let ok = gexiv2::gexiv2_metadata_from_app1_segment(
+                metadata,
+                data.as_ptr(),
+                data.len() as libc::c_long,
+                &mut err,
+            );
+            if ok != 1 {
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
+            }
+            Ok(Metadata { raw: metadata })
+        }
+    }
+
     /// Load the metadata from the given data buffer.
     ///
     /// # Examples

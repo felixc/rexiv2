@@ -17,3 +17,4 @@ Contributors
 * Jean-Baptiste Daval
 * Riley Trautman
 * Sean Dawson
+* Hubert Figuière
