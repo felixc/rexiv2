@@ -880,7 +880,13 @@ impl Metadata {
             gexiv2::gexiv2_metadata_get_exif_tag_rational(self.raw, c_str_tag.as_ptr(), num, den)
         } {
             0 => None,
-            _ => Some(num_rational::Ratio::new(*num, *den)),
+            _ => {
+                if *den != 0 {
+                    Some(num_rational::Ratio::new(*num, *den))
+                } else {
+                    None
+                }
+            }
         }
     }
 
