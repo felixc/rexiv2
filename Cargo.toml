@@ -21,7 +21,7 @@ categories = ["multimedia::images"]
 readme = "README.md"
 
 edition = "2021"
-rust-version = "1.56"
+rust-version = "1.63"
 
 include = [
   "Cargo.toml",
@@ -33,10 +33,10 @@ include = [
 ]
 
 [dependencies]
-gexiv2-sys = "1.2"
+gexiv2-sys = "1.4"
 libc = "0.2"
 num-rational = { version = "0.4", default-features = false }
-glib-sys = { version = "0.15", optional = true }
+glib-sys = { version = "0.16", optional = true }
 
 [features]
 raw-tag-access = ["gexiv2-sys/raw-tag-access", "glib-sys"]

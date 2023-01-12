@@ -65,7 +65,7 @@ jobs:
       - build_and_test_steps
   test-linux-msrv:
     docker:
-      - image: rust:1.56-slim
+      - image: rust:1.63-slim
     <<: *linux_job_config
   test-linux-stable:
     docker:

@@ -69,8 +69,8 @@ impl std::fmt::Display for Rexiv2Error {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         match *self {
             Rexiv2Error::NoValue => write!(f, "No value found"),
-            Rexiv2Error::Utf8(ref err) => write!(f, "IO error: {}", err),
-            Rexiv2Error::Internal(Some(ref msg)) => write!(f, "Internal error: {}", msg),
+            Rexiv2Error::Utf8(ref err) => write!(f, "IO error: {err}"),
+            Rexiv2Error::Internal(Some(ref msg)) => write!(f, "Internal error: {msg}"),
             Rexiv2Error::Internal(None) => write!(f, "Unknown internal error"),
         }
     }

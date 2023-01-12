@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 
 
-MSRV=1.56  # Minimum supported Rust version
+MSRV=1.63  # Minimum supported Rust version
 
 
 help:
