@@ -3,8 +3,8 @@ SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CON
 SPDX-License-Identifier: CC0-1.0
 -->
 
-## [NEXT] - Unreleased
-  * New API: new_from_app1_segment allows reading metadata from a buffer.
+## [v0.10.0] - 2023-01-21
+  * New API: `new_from_app1_segment` allows reading metadata from a buffer.
   * Added support for Windows file paths.
   * Require Rust 1.63 as the minimum supported language version.
   * Adopt 2021 edition of the language.
