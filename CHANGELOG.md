@@ -3,8 +3,8 @@ SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CON
 SPDX-License-Identifier: CC0-1.0
 -->
 
-## [NEXT] - Unreleased
-  * New API: new_from_app1_segment allows reading metadata from a buffer.
+## [v0.10.0] - 2023-01-21
+  * New API: `new_from_app1_segment` allows reading metadata from a buffer.
   * Added support for Windows file paths.
   * Require Rust 1.63 as the minimum supported language version.
   * Adopt 2021 edition of the language.
@@ -99,6 +99,10 @@ SPDX-License-Identifier: CC0-1.0
   * First preview release to solicit code review and feedback.
 
 
+[v0.10.0]: https://github.com/felixc/rexiv2/compare/v0.9.1...v0.10.0
+[v0.9.1]: https://github.com/felixc/rexiv2/compare/v0.9.0...v0.9.1
+[v0.9.0]: https://github.com/felixc/rexiv2/compare/v0.8.0...v0.9.0
+[v0.8.0]: https://github.com/felixc/rexiv2/compare/v0.7.0...v0.8.0
 [v0.7.0]: https://github.com/felixc/rexiv2/compare/v0.6.0...v0.7.0
 [v0.6.0]: https://github.com/felixc/rexiv2/compare/v0.5.0...v0.6.0
 [v0.5.0]: https://github.com/felixc/rexiv2/compare/v0.4.3...v0.5.0
