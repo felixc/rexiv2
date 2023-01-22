@@ -90,6 +90,16 @@ impl From<str::Utf8Error> for Rexiv2Error {
     }
 }
 
+impl From<std::ffi::NulError> for Rexiv2Error {
+    fn from(err: std::ffi::NulError) -> Rexiv2Error {
+        Rexiv2Error::Internal(Some(format!(
+            "Couldn't convert the given bytes to a C string. Nul byte at position {} of {:?}.",
+            err.nul_position(),
+            err.into_vec()
+        )))
+    }
+}
+
 /// A specialized Result type that specifies the Err instances will be Rexiv2Errors.
 pub type Result<T> = std::result::Result<T, Rexiv2Error>;
 
@@ -713,7 +723,7 @@ impl Metadata {
     /// assert_eq!(meta.get_tag_string("Iptc.Application2.Subject"), Ok("Test Image".to_string()));
     /// ```
     pub fn get_tag_string(&self, tag: &str) -> Result<String> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         unsafe {
             let c_str_val = gexiv2::gexiv2_metadata_get_tag_string(self.raw, c_str_tag.as_ptr());
             if c_str_val.is_null() {
@@ -740,8 +750,8 @@ impl Metadata {
     /// assert_eq!(meta.get_tag_string("Iptc.Application2.Subject"), Ok("Test Image".to_string()));
     /// ```
     pub fn set_tag_string(&self, tag: &str, value: &str) -> Result<()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
-        let c_str_val = ffi::CString::new(value).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
+        let c_str_val = ffi::CString::new(value)?;
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_string(
                 self.raw,
@@ -755,7 +765,7 @@ impl Metadata {
     ///
     /// Only safe if the tag is really of a string type.
     pub fn get_tag_interpreted_string(&self, tag: &str) -> Result<String> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         unsafe {
             let c_str_val =
                 gexiv2::gexiv2_metadata_get_tag_interpreted_string(self.raw, c_str_tag.as_ptr());
@@ -772,7 +782,7 @@ impl Metadata {
     ///
     /// Only safe if the tag is in fact of a string type.
     pub fn get_tag_multiple_strings(&self, tag: &str) -> Result<Vec<String>> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         let mut vals = vec![];
         unsafe {
             let c_vals = gexiv2::gexiv2_metadata_get_tag_multiple(self.raw, c_str_tag.as_ptr());
@@ -798,10 +808,10 @@ impl Metadata {
 
     /// Store the given strings as the values of a tag.
     pub fn set_tag_multiple_strings(&self, tag: &str, values: &[&str]) -> Result<()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         let c_strs: std::result::Result<Vec<_>, _> =
             values.iter().map(|&s| ffi::CString::new(s)).collect();
-        let c_strs = c_strs.unwrap();
+        let c_strs = c_strs?;
         let mut ptrs: Vec<_> = c_strs.iter().map(|c| c.as_ptr()).collect();
         ptrs.push(ptr::null());
         unsafe {
@@ -847,7 +857,7 @@ impl Metadata {
     /// assert_eq!(meta.get_tag_numeric("Exif.Photo.MaxApertureValue"), 5);
     /// ```
     pub fn set_tag_numeric(&self, tag: &str, value: i32) -> Result<()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_tag_long(
                 self.raw,
@@ -873,7 +883,7 @@ impl Metadata {
     /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
     /// ```
     pub fn get_tag_rational(&self, tag: &str) -> Option<num_rational::Ratio<i32>> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag).ok()?;
         let num = &mut 0;
         let den = &mut 0;
         match unsafe {
@@ -906,7 +916,7 @@ impl Metadata {
     /// assert_eq!(meta.get_tag_rational("Exif.Photo.MaxApertureValue"), Some(ratio));
     /// ```
     pub fn set_tag_rational(&self, tag: &str, value: &num_rational::Ratio<i32>) -> Result<()> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_exif_tag_rational(
                 self.raw,
@@ -931,7 +941,7 @@ impl Metadata {
     /// ```
     #[cfg(feature = "raw-tag-access")]
     pub fn get_tag_raw(&self, tag: &str) -> Result<Vec<u8>> {
-        let c_str_tag = ffi::CString::new(tag).unwrap();
+        let c_str_tag = ffi::CString::new(tag)?;
         unsafe {
             let raw_tag_value = gexiv2::gexiv2_metadata_get_tag_raw(self.raw, c_str_tag.as_ptr());
             let size = &mut 0;
@@ -1275,7 +1285,7 @@ pub fn is_xmp_tag(tag: &str) -> bool {
 /// assert_eq!(rexiv2::get_tag_label("Iptc.Application2.Subject"), Ok("Subject".to_string()));
 /// ```
 pub fn get_tag_label(tag: &str) -> Result<String> {
-    let c_str_tag = ffi::CString::new(tag).unwrap();
+    let c_str_tag = ffi::CString::new(tag)?;
     unsafe {
         let c_str_val = gexiv2::gexiv2_metadata_get_tag_label(c_str_tag.as_ptr());
         if c_str_val.is_null() {
@@ -1293,7 +1303,7 @@ pub fn get_tag_label(tag: &str) -> Result<String> {
 ///     Ok("The Subject Reference is a structured definition of the subject matter.".to_string()));
 /// ```
 pub fn get_tag_description(tag: &str) -> Result<String> {
-    let c_str_tag = ffi::CString::new(tag).unwrap();
+    let c_str_tag = ffi::CString::new(tag)?;
     unsafe {
         let c_str_val = gexiv2::gexiv2_metadata_get_tag_description(c_str_tag.as_ptr());
         if c_str_val.is_null() {
@@ -1311,7 +1321,7 @@ pub fn get_tag_description(tag: &str) -> Result<String> {
 /// assert_eq!(rexiv2::get_tag_type("Iptc.Application2.DateCreated"), Ok(rexiv2::TagType::Date));
 /// ```
 pub fn get_tag_type(tag: &str) -> Result<TagType> {
-    let c_str_tag = ffi::CString::new(tag).unwrap();
+    let c_str_tag = ffi::CString::new(tag)?;
     let tag_type = unsafe {
         let c_str_val = gexiv2::gexiv2_metadata_get_tag_type(c_str_tag.as_ptr());
         if c_str_val.is_null() {
@@ -1408,8 +1418,8 @@ pub fn initialize() -> Result<()> {
 ///    Err(rexiv2::Rexiv2Error::Internal(None)));
 /// ```
 pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<()> {
-    let c_str_name = ffi::CString::new(name).unwrap();
-    let c_str_prefix = ffi::CString::new(prefix).unwrap();
+    let c_str_name = ffi::CString::new(name)?;
+    let c_str_prefix = ffi::CString::new(prefix)?;
     unsafe {
         int_bool_to_result(gexiv2::gexiv2_metadata_register_xmp_namespace(
             c_str_name.as_ptr(),
@@ -1431,7 +1441,7 @@ pub fn register_xmp_namespace(name: &str, prefix: &str) -> Result<()> {
 ///    Err(rexiv2::Rexiv2Error::Internal(None)));
 /// ```
 pub fn unregister_xmp_namespace(name: &str) -> Result<()> {
-    let c_str_name = ffi::CString::new(name).unwrap();
+    let c_str_name = ffi::CString::new(name)?;
     unsafe {
         int_bool_to_result(gexiv2::gexiv2_metadata_unregister_xmp_namespace(
             c_str_name.as_ptr(),
@@ -1503,18 +1513,9 @@ fn int_bool_to_result(success: libc::c_int) -> Result<()> {
 
 /// Convert an OS string to a UTF-8 CString
 fn os_str_to_c_string<S: AsRef<ffi::OsStr>>(path: S) -> Result<ffi::CString> {
-    let path_as_utf8_result = path.as_ref().to_str();
-    if path_as_utf8_result.is_none() {
-        return Err(Rexiv2Error::Internal(Some(
-            "Could not convert path to UTF-8".to_string(),
-        )));
-    }
-
-    if let Ok(path_as_c_string) = ffi::CString::new(path_as_utf8_result.unwrap().as_bytes()) {
-        return Ok(path_as_c_string);
-    }
-
-    Err(Rexiv2Error::Internal(Some(
-        "Could not construct CString from UTF-8 path".to_string(),
-    )))
+    let path_as_utf8_result = path
+        .as_ref()
+        .to_str()
+        .ok_or_else(|| Rexiv2Error::Internal(Some("Couldn't convert path to UTF-8".to_string())))?;
+    Ok(ffi::CString::new(path_as_utf8_result.as_bytes())?)
 }
