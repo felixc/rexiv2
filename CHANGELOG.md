@@ -3,6 +3,9 @@ SPDX-FileCopyrightText: 2015–2022 Felix A. Crux <felixc@felixcrux.com> and CON
 SPDX-License-Identifier: CC0-1.0
 -->
 
+## [NEXT] - Unreleased
+  * Bugfix: Stop reducing/simplifying rational values like apertures.
+
 ## [v0.10.0] - 2023-01-21
   * New API: `new_from_app1_segment` allows reading metadata from a buffer.
   * Added support for Windows file paths.

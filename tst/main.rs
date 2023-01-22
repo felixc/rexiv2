@@ -132,6 +132,34 @@ fn supports_bmff() {
 }
 
 #[test]
+fn get_tag_rational_values_are_not_reduced() {
+    test_setup();
+    let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
+    meta.set_tag_rational(
+        "Exif.Photo.ApertureValue",
+        &num_rational::Ratio::new_raw(16, 10),
+    )
+    .unwrap();
+    let result = meta.get_tag_rational("Exif.Photo.ApertureValue").unwrap();
+    assert_eq!(*result.numer(), 16);
+    assert_eq!(*result.denom(), 10);
+}
+
+#[test]
+fn get_exposure_time_values_are_not_reduced() {
+    test_setup();
+    let meta = rexiv2::Metadata::new_from_buffer(include_bytes!("sample.png")).unwrap();
+    meta.set_tag_rational(
+        "Exif.Photo.ExposureTime",
+        &num_rational::Ratio::new_raw(10, 1000),
+    )
+    .unwrap();
+    let result = meta.get_exposure_time().unwrap();
+    assert_eq!(*result.numer(), 10);
+    assert_eq!(*result.denom(), 1000);
+}
+
+#[test]
 fn log_levels() {
     test_setup();
     assert_eq!(rexiv2::get_log_level(), rexiv2::LogLevel::WARN);

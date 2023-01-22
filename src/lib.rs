@@ -882,7 +882,7 @@ impl Metadata {
             0 => None,
             _ => {
                 if *den != 0 {
-                    Some(num_rational::Ratio::new(*num, *den))
+                    Some(num_rational::Ratio::new_raw(*num, *den))
                 } else {
                     None
                 }
@@ -999,7 +999,13 @@ impl Metadata {
         let den = &mut 0;
         match unsafe { gexiv2::gexiv2_metadata_get_exposure_time(self.raw, num, den) } {
             0 => None,
-            _ => Some(num_rational::Ratio::new(*num, *den)),
+            _ => {
+                if *den != 0 {
+                    Some(num_rational::Ratio::new_raw(*num, *den))
+                } else {
+                    None
+                }
+            }
         }
     }
 
