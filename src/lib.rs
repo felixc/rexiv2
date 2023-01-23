@@ -121,7 +121,7 @@ pub struct PreviewImage<'a> {
 pub struct GpsInfo {
     pub longitude: f64,
     pub latitude: f64,
-    pub altitude: f64,
+    pub altitude: Option<f64>,
 }
 
 /// The possible data types that a tag can have.
@@ -1129,24 +1129,68 @@ impl Metadata {
     // GPS-related methods.
 
     /// Retrieve the stored GPS information from the loaded file.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// meta.set_gps_info(&rexiv2::GpsInfo { longitude: 0.2, latitude: 0.3, altitude: Some(0.4) });
+    /// assert_eq!(
+    ///     meta.get_gps_info(),
+    ///     Some(rexiv2::GpsInfo { longitude: 0.2, latitude: 0.3, altitude: Some(0.4) }),
+    /// );
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     pub fn get_gps_info(&self) -> Option<GpsInfo> {
         let lon = &mut 0.0;
         let lat = &mut 0.0;
         let alt = &mut 0.0;
         match unsafe { gexiv2::gexiv2_metadata_get_gps_info(self.raw, lon, lat, alt) } {
-            0 => None,
-            _ => Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: *alt }),
+            0 => {
+                // If we get a "false" result, it might just be because the altitude is missing.
+                // This is the behaviour since gexiv2 0.12.2. In 0.12.1 and earlier, we'd still
+                // get a "true" result but altitude would be set to 0.0, which we handle below.
+                if *lon != 0.0 && *lat != 0.0 && *alt == 0.0 {
+                    Some(GpsInfo { longitude: *lon, latitude: *lat, altitude: None })
+                } else {
+                    None
+                }
+            }
+            _ => Some(GpsInfo {
+                longitude: *lon,
+                latitude: *lat,
+                altitude: if *alt != 0.0 { Some(*alt) } else { None },
+            }),
         }
     }
 
     /// Save the specified GPS values to the metadata.
+    ///
+    /// # Examples
+    /// ```
+    /// # let minipng = [137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 13, 73, 72, 68, 82, 0, 0, 0,
+    /// #               1, 0, 0, 0, 1, 8, 0, 0, 0, 0, 58, 126, 155, 85, 0, 0, 0, 10, 73, 68, 65,
+    /// #               84, 8, 215, 99, 248, 15, 0, 1, 1, 1, 0, 27, 182, 238, 86, 0, 0, 0, 0, 73,
+    /// #               69, 78, 68, 174, 66, 96, 130];
+    /// # let meta = rexiv2::Metadata::new_from_buffer(&minipng).unwrap();
+    /// assert_eq!(meta.get_gps_info(), None);
+    /// meta.set_gps_info(&rexiv2::GpsInfo { longitude: 0.8, latitude: 0.9, altitude: None });
+    /// assert_eq!(
+    ///     meta.get_gps_info(),
+    ///     Some(rexiv2::GpsInfo { longitude: 0.8, latitude: 0.9, altitude: None }),
+    /// );
+    /// # Ok::<(), Box<dyn std::error::Error>>(())
+    /// ```
     pub fn set_gps_info(&self, gps: &GpsInfo) -> Result<()> {
         unsafe {
             int_bool_to_result(gexiv2::gexiv2_metadata_set_gps_info(
                 self.raw,
                 gps.longitude,
                 gps.latitude,
-                gps.altitude,
+                gps.altitude.unwrap_or(0.0),
             ))
         }
     }

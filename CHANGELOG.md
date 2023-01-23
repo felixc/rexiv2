@@ -5,6 +5,12 @@ SPDX-License-Identifier: CC0-1.0
 
 ## [NEXT] - Unreleased
   * Bugfix: Stop reducing/simplifying rational values like apertures.
+  * Breaking API change/bugfix: The altitude part of GpsInfo is now Optional.
+    This works around an upstream change that caused `get_gps_info` to return
+    `None` if altitude was unset, even if lat/long were present. Now lat/long
+    will be returned, but altitude will be `None`. Altitudes that may have been
+    previously shown as `0.0` will now be `None`. Calls to `set_gps_info` will
+    also need updating. Thank you Jonas Hagen for the report and investigation.
 
 ## [v0.10.0] - 2023-01-21
   * New API: `new_from_app1_segment` allows reading metadata from a buffer.
