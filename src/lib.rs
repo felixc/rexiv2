@@ -291,9 +291,11 @@ impl Metadata {
             let metadata = gexiv2::gexiv2_metadata_new();
             let ok = gexiv2::gexiv2_metadata_open_path(metadata, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
-                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                gexiv2::gexiv2_metadata_free(metadata);
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str().map(str::to_string);
+                // gexiv2::g_error_free(err);
                 return Err(Rexiv2Error::Internal(
-                    err_msg.ok().map(|msg| msg.to_string()),
+                    err_msg.ok(),
                 ));
             }
             Ok(Metadata { raw: metadata })
@@ -314,9 +316,11 @@ impl Metadata {
                 &mut err,
             );
             if ok != 1 {
-                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                gexiv2::gexiv2_metadata_free(metadata);
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str().map(str::to_string);
+                // gexiv2::g_error_free(err);
                 return Err(Rexiv2Error::Internal(
-                    err_msg.ok().map(|msg| msg.to_string()),
+                    err_msg.ok(),
                 ));
             }
             Ok(Metadata { raw: metadata })
@@ -346,9 +350,11 @@ impl Metadata {
                 &mut err,
             );
             if ok != 1 {
-                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                gexiv2::gexiv2_metadata_free(metadata);
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str().map(str::to_string);
+                // gexiv2::g_error_free(err);
                 return Err(Rexiv2Error::Internal(
-                    err_msg.ok().map(|msg| msg.to_string()),
+                    err_msg.ok(),
                 ));
             }
             Ok(Metadata { raw: metadata })
@@ -363,9 +369,10 @@ impl Metadata {
         unsafe {
             let ok = gexiv2::gexiv2_metadata_save_file(self.raw, c_str_path.as_ptr(), &mut err);
             if ok != 1 {
-                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str().map(str::to_string);
+                // gexiv2::g_error_free(err);
                 return Err(Rexiv2Error::Internal(
-                    err_msg.ok().map(|msg| msg.to_string()),
+                    err_msg.ok(),
                 ));
             }
             Ok(())
@@ -729,9 +736,9 @@ impl Metadata {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            let value = ffi::CStr::from_ptr(c_str_val).to_str()?.to_string();
+            let value = ffi::CStr::from_ptr(c_str_val).to_str().map(str::to_string);
             libc::free(c_str_val as *mut libc::c_void);
-            Ok(value)
+            Ok(value?)
         }
     }
 
@@ -772,9 +779,9 @@ impl Metadata {
             if c_str_val.is_null() {
                 return Err(Rexiv2Error::NoValue);
             }
-            let value = ffi::CStr::from_ptr(c_str_val).to_str()?.to_string();
+            let value = ffi::CStr::from_ptr(c_str_val).to_str().map(str::to_string);
             libc::free(c_str_val as *mut libc::c_void);
-            Ok(value)
+            Ok(value?)
         }
     }
 
@@ -1085,9 +1092,10 @@ impl Metadata {
                 &mut err,
             );
             if ok != 1 {
-                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str().map(str::to_string);
+                // gexiv2::g_error_free(err);
                 return Err(Rexiv2Error::Internal(
-                    err_msg.ok().map(|msg| msg.to_string()),
+                    err_msg.ok(),
                 ));
             }
             Ok(())
