@@ -168,6 +168,21 @@ fn log_levels() {
 }
 
 #[test]
+fn test_simple_save_to_buffer() {
+    test_setup();
+    let data = include_bytes!("sample.png");
+    let meta = rexiv2::Metadata::new_from_buffer(data).unwrap();
+    let result = meta.save_to_buffer(data);
+    assert!(result.is_ok());
+    let unwrapped_result = result.unwrap();
+    assert!(unwrapped_result.len() > 0);
+    assert_eq!(unwrapped_result.len(), data.len());
+
+    // these should be equal since we didn't adjust anything
+    assert!(unwrapped_result == data);
+}
+
+#[test]
 #[cfg(feature = "raw-tag-access")]
 fn get_tag_raw() {
     test_setup();
