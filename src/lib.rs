@@ -47,8 +47,11 @@ extern crate gexiv2_sys as gexiv2;
 pub use gexiv2::GExiv2LogLevel as LogLevel;
 
 use std::ffi;
+use std::ffi::c_void;
+use std::io::Cursor;
 use std::ptr;
 use std::str;
+use gexiv2::ManagedStreamCallbacks;
 
 /// A wrapper type for the kinds of errors one might encounter when using the library.
 #[derive(Debug, PartialEq, Eq)]
@@ -106,7 +109,7 @@ pub type Result<T> = std::result::Result<T, Rexiv2Error>;
 /// An opaque structure that serves as a container for a media file's metadata.
 #[derive(Debug, PartialEq, Eq)]
 pub struct Metadata {
-    raw: *mut gexiv2::GExiv2Metadata,
+    pub raw: *mut gexiv2::GExiv2Metadata,
 }
 
 /// An opaque structure that serves as a container for a preview image.
@@ -372,6 +375,23 @@ impl Metadata {
         }
     }
 
+    /// Put metadata in a buffer by constructing a stream, writing to it, and then reading the result
+    pub fn save_to_buffer(&self, image_data: &[u8]) -> Result<Vec<u8>> {
+        unsafe {
+            let mut cursor = Cursor::new(Vec::from(image_data));
+            let mut callbacks = ManagedStreamCallbacks::new(&mut cursor as *mut Cursor<Vec<u8>> as *mut c_void);
+            let mut err: *mut gexiv2::GError = ptr::null_mut();
+            let result = gexiv2::gexiv2_metadata_save_stream(self.raw, &mut callbacks as *mut ManagedStreamCallbacks, &mut err);
+            if result != 1 {
+                let err_msg = ffi::CStr::from_ptr((*err).message).to_str();
+                return Err(Rexiv2Error::Internal(
+                    err_msg.ok().map(|msg| msg.to_string()),
+                ));
+            }
+
+            Ok(cursor.into_inner())
+        }
+    }
 
     // Image information.
 
